@@ -1,0 +1,13 @@
+use_frameworks!
+
+platform :ios, '9.0'
+
+target 'LinePrinter_Example' do
+  pod 'LinePrinter', :path => '../'
+
+  target 'LinePrinter_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
