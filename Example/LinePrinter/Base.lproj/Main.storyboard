@@ -18,31 +18,8 @@
                     <view key="view" contentMode="scaleToFill" id="kh9-bI-dsS">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                        <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="8jj-w7-wuS">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="329.5"/>
-                            </imageView>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="kOZ-h9-gdD">
-                                <rect key="frame" x="0.0" y="337.5" width="375" height="329.5"/>
-                            </imageView>
-                        </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                        <constraints>
-                            <constraint firstItem="kOZ-h9-gdD" firstAttribute="width" secondItem="8jj-w7-wuS" secondAttribute="width" id="7qP-6Z-l72"/>
-                            <constraint firstAttribute="trailing" secondItem="8jj-w7-wuS" secondAttribute="trailing" id="KKe-cU-Zym"/>
-                            <constraint firstAttribute="trailing" secondItem="kOZ-h9-gdD" secondAttribute="trailing" id="ZzF-n8-Vg8"/>
-                            <constraint firstItem="8jj-w7-wuS" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" id="aO2-97-LNR"/>
-                            <constraint firstItem="kOZ-h9-gdD" firstAttribute="height" secondItem="8jj-w7-wuS" secondAttribute="height" id="bZP-pI-uSr"/>
-                            <constraint firstItem="2fi-mo-0CV" firstAttribute="top" secondItem="kOZ-h9-gdD" secondAttribute="bottom" id="fUV-yK-MvR"/>
-                            <constraint firstItem="kOZ-h9-gdD" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" id="pi5-ig-Bv5"/>
-                            <constraint firstItem="kOZ-h9-gdD" firstAttribute="top" secondItem="8jj-w7-wuS" secondAttribute="bottom" constant="8" symbolic="YES" id="pnn-ma-iux"/>
-                            <constraint firstItem="8jj-w7-wuS" firstAttribute="top" secondItem="jyV-Pf-zRb" secondAttribute="bottom" id="rDd-nP-IgH"/>
-                        </constraints>
                     </view>
-                    <connections>
-                        <outlet property="bottom" destination="kOZ-h9-gdD" id="Gkr-3M-bgQ"/>
-                        <outlet property="top" destination="8jj-w7-wuS" id="43W-rB-tmW"/>
-                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
             </objects>

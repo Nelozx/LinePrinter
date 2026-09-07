@@ -552,9 +552,6 @@ public extension Data {
     /// 开钱箱指令数据
     static let drawer = Data(escpos: .drawerKick(m: 48, t1: 10, t2: 10))
     
-    /// 结束输出
-    static let endOutput = Data(escpos: Commands([250]))
-    
     /// 全切纸指令数据
     static var cut: Data {
         Data(escpos:
@@ -565,31 +562,8 @@ public extension Data {
     /// 半切纸指令数据
     static let partialCut = Data(escpos: .cutPaper(m: 49))
     
-    /// 开启钱箱脉冲（通用）
-    static var cash: Data {
-        Data(escpos: .drawerKick(m: 48, t1: 10, t2: 255))
-    }
-    
-    /// 进纸一行指令数据
-    static let formfeed = Data(escpos: .printAndFeed())
-    
-    /// 钱箱电平脉冲
-    static var pulse: Data {
-        Data(escpos: .drawerKick(m: 48, t1: 2, t2: 2))
-    }
-    
-    /// 水平移动
-    static func move(x: Int) -> Data {
-        Data(escpos: .position(horizontal: UInt8(x % 256), UInt8(x / 256)))
-    }
-    
-    /// 垂直移动
-    static func move(y: Int) -> Data {
-        Data(escpos: .position(vertical: UInt8(y % 256), UInt8(y / 256)))
-    }
-    
     /// 走纸并切纸组合指令数据
-    static let feedAndCut = formfeed + cut
+    static let feedAndCut = Data(escpos: .printAndFeed()) + cut
 }
 
 // MARK: - Buzzer / Sound

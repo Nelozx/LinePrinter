@@ -21,9 +21,6 @@ class MockTransport: PrinterTransport {
 
 class ViewController: UIViewController {
 
-    @IBOutlet weak var top: UIImageView?
-    @IBOutlet weak var bottom: UIImageView?
-
     // 视图容器
     private let scrollView = UIScrollView()
     private let contentView = UIView()
@@ -436,8 +433,6 @@ class ViewController: UIViewController {
 
     // MARK: - 界面布局搭建
     private func setupUI() {
-        top?.isHidden = true
-        bottom?.isHidden = true
         view.backgroundColor = UIColor(red: 0.94, green: 0.95, blue: 0.97, alpha: 1.0)
         
         // 顶部纸宽切换
