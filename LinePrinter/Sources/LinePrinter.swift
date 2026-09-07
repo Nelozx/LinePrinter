@@ -66,7 +66,20 @@ public enum LinePrinter {
     ///     .twoColumn("应收", "￥20.00"),
     ///     .cut
     /// ).print(to: bluetoothTransport)
+    /// 便捷构建小票对象（纯变长参数 DSL，支持链式 .print(to:)）
+    ///
+    /// ```swift
+    /// LinePrinter.ticket(
+    ///     .text("快速结账单", bold: true, alignment: .center),
+    ///     .twoColumn("应收", "￥20.00"),
+    ///     .cut
+    /// ).print(to: bluetoothTransport)
     /// ```
+    public static func ticket(_ chunks: Chunk...) -> Ticket {
+        Ticket(chunks: chunks, autoInitialize: true, autoCut: false)
+    }
+
+    /// 便捷构建小票对象（带初始化/切纸控制的变长参数 DSL）
     public static func ticket(
         autoInitialize: Bool = true,
         autoCut: Bool = false,

@@ -175,33 +175,41 @@ public extension Chunk {
         Chunk(Splitter(provider: char, printDensity: printDensity, fontDensity: fontDensity))
     }
     
+    /// 空占位排版块（不打印任何内容，不走纸）
+    static var empty: Self {
+        Chunk(RawDataChunkProvider(Data()), feedPoints: 0)
+    }
+    
     #if canImport(UIKit)
-    /// 打印位图（内置灰度与误差扩散抖动算法）
+    /// 打印位图（iOS UIKit）
     ///
-    /// 将 `UIImage` 转换为 ESC/POS 标准单色光栅位图指令（`GS v 0`），可清晰还原 Logo 或图形层次。
+    /// 将 `UIImage` 转换为 ESC/POS 标准单色光栅位图指令（`GS v 0`），可清晰还原 Logo 或图形层次。若传入 `nil` 则自动转换为空块。
     /// - Parameters:
-    ///   - image: 需要打印的 UIImage 对象
+    ///   - image: 需要打印的可选 UIImage 对象
     ///   - dither: 二值化处理方式，默认 `.floydSteinberg` 误差扩散抖动（适合照片或渐变图形），亦可选用 `.threshold(128)` 灰度阈值法（适合纯黑白线条 Logo）
     /// - Returns: 位图排版块
     ///
     /// ```swift
     /// .image(logoImage, dither: .floydSteinberg)
     /// ```
-    static func image(_ image: UIImage, dither: ImageDitherStyle = .floydSteinberg) -> Self {
-        Chunk(Image(image, dither: dither))
+    static func image(_ image: UIImage?, dither: ImageDitherStyle = .floydSteinberg) -> Self {
+        guard let image = image else { return .empty }
+        return Chunk(Image(image, dither: dither))
     }
     #endif
     
     #if canImport(AppKit) && !targetEnvironment(macCatalyst)
     /// 打印位图（macOS AppKit）
-    static func image(_ image: NSImage, dither: ImageDitherStyle = .floydSteinberg) -> Self {
-        Chunk(Image(image, dither: dither))
+    static func image(_ image: NSImage?, dither: ImageDitherStyle = .floydSteinberg) -> Self {
+        guard let image = image else { return .empty }
+        return Chunk(Image(image, dither: dither))
     }
     #endif
 
     /// 打印位图（CoreGraphics CGImage）
-    static func image(cgImage: CGImage, dither: ImageDitherStyle = .floydSteinberg) -> Self {
-        Chunk(Image(cgImage: cgImage, dither: dither))
+    static func image(cgImage: CGImage?, dither: ImageDitherStyle = .floydSteinberg) -> Self {
+        guard let cgImage = cgImage else { return .empty }
+        return Chunk(Image(cgImage: cgImage, dither: dither))
     }
     
     /// 自定义多列排版行

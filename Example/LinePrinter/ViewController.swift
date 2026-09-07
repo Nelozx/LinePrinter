@@ -61,17 +61,13 @@ class ViewController: UIViewController {
         let logoImage = UIImage(named: "good") ?? makeDemoLogoImage()
         let printDensity = totalWidth == 32 ? 384 : 576
         
-        var chunks: [Chunk] = [
+        return LinePrinter.ticket(
+            autoInitialize: true,
+            autoCut: true,
             // 1. 顶部行间距与蜂鸣器设置
-            .lineSpacing(22)
-        ]
-        
-        // 2. 顶部 Logo 图案 (单色位图抖动打印)
-        if let logo = logoImage {
-            chunks.append(.image(logo, dither: .floydSteinberg))
-        }
-        
-        chunks.append(contentsOf: [
+            .lineSpacing(22),
+            // 2. 顶部 Logo 图案 (单色位图抖动打印)
+            .image(logoImage, dither: .floydSteinberg),
             // 3. 店铺名与单号时间
             .text("味美餐饮旗舰店", bold: true, alignment: .center),
             .text("-- 欢迎光临 --", attributes: [TextAttribute.alignment(.center)]),
@@ -109,9 +105,7 @@ class ViewController: UIViewController {
             .defaultLineSpacing,
             .buzzer(times: 2),
             .feed(lines: 2)
-        ])
-        
-        return LinePrinter.ticket(chunks: chunks, autoInitialize: true, autoCut: true)
+        )
     }
 
     // MARK: - 刷新小票模型与原生预览模式视图
