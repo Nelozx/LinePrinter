@@ -73,7 +73,6 @@ struct ChunkModel: Codable {
     // MARK: - Image 点阵位图
     var name: String?             // 本地图片资源名
     var base64: String?           // 远程/服务端下发的 Base64 图片数据
-    var url: String?              // 远程图片 URL 地址
     var dither: String?           // "floydSteinberg", "threshold"
     var threshold: UInt8?         // 二值化阈值 (0~255)
     
@@ -165,8 +164,6 @@ extension ChunkModel {
             
             if let b64 = base64 {
                 chunk = .image(base64: b64, dither: ditherStyle)
-            } else if let u = url {
-                chunk = .image(url: u, dither: ditherStyle)
             } else if let name = name {
                 chunk = .image(named: name, dither: ditherStyle)
             } else {

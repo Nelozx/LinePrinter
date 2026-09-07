@@ -72,32 +72,6 @@ public struct Image: Printable {
         }
     }
     
-    /// 初始化位图打印元素（远程网络图片 URL，内置内存缓存）
-    /// - Parameters:
-    ///   - url: 远程图片 URL
-    ///   - dither: 抖动算法风格
-    ///   - timeout: 网络拉取超时时间（秒，默认 5 秒）
-    public init(url: URL, dither: ImageDitherStyle = .floydSteinberg, timeout: TimeInterval = 5.0) {
-        if let data = RemoteImageLoader.shared.loadData(from: url, timeout: timeout) {
-            self.init(data: data, dither: dither)
-        } else {
-            self.init(cgImage: nil, dither: dither)
-        }
-    }
-    
-    /// 初始化位图打印元素（远程网络图片 URL 字符串）
-    /// - Parameters:
-    ///   - urlString: 图片 URL 字符串
-    ///   - dither: 抖动算法风格
-    ///   - timeout: 网络超时时间
-    public init(urlString: String, dither: ImageDitherStyle = .floydSteinberg, timeout: TimeInterval = 5.0) {
-        if let url = URL(string: urlString) {
-            self.init(url: url, dither: dither, timeout: timeout)
-        } else {
-            self.init(cgImage: nil, dither: dither)
-        }
-    }
-    
     #if canImport(UIKit)
     /// 初始化位图打印元素（iOS / UIKit）
     /// - Parameters:
@@ -145,39 +119,5 @@ public struct Image: Printable {
     private static func decodeCGImage(from data: Data) -> CGImage? {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil) else { return nil }
         return CGImageSourceCreateImageAtIndex(source, 0, nil)
-    }
-}
-
-// MARK: - 远程图片缓存加载器
-final class RemoteImageLoader {
-    static let shared = RemoteImageLoader()
-    private let cache = NSCache<NSString, NSData>()
-    
-    private init() {
-        cache.countLimit = 100
-    }
-    
-    func loadData(from url: URL, timeout: TimeInterval = 5.0) -> Data? {
-        let key = url.absoluteString as NSString
-        if let cached = cache.object(forKey: key) {
-            return cached as Data
-        }
-        
-        let semaphore = DispatchSemaphore(value: 0)
-        var resultData: Data?
-        
-        var request = URLRequest(url: url, timeoutInterval: timeout)
-        request.httpMethod = "GET"
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let data = data, error == nil {
-                resultData = data
-                self.cache.setObject(data as NSData, forKey: key)
-            }
-            semaphore.signal()
-        }
-        task.resume()
-        _ = semaphore.wait(timeout: .now() + timeout)
-        return resultData
     }
 }

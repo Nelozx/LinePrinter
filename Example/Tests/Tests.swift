@@ -616,8 +616,8 @@ class Tests: XCTestCase {
         }
     }
     
-    // MARK: - 远程图片支持测试 (Base64 与 URL)
-    func testRemoteImageBase64AndURL() {
+    // MARK: - 动态位图支持测试 (Base64 与 二进制 Data)
+    func testImageBase64AndData() {
         // 创建一个简单的 16x16 测试位图 PNG Data
         let size = CGSize(width: 16, height: 16)
         UIGraphicsBeginImageContextWithOptions(size, true, 1.0)
@@ -642,17 +642,13 @@ class Tests: XCTestCase {
         let dataUriB64 = chunkUriB64.data(using: .utf8)
         XCTAssertFalse(dataUriB64.isEmpty, "DataURI 前缀 Base64 图片生成打印数据不应为空")
         
-        // 2. 测试 Chunk.image(url:) 本地 file URL 模拟网络 URL
-        let tempFileURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("test_remote_img.png")
-        try? pngData.write(to: tempFileURL)
-        defer { try? FileManager.default.removeItem(at: tempFileURL) }
+        // 2. 测试 Chunk.image(data:) 二进制数据直接注入
+        let chunkData = Chunk.image(data: pngData, dither: .floydSteinberg)
+        let dataFromBytes = chunkData.data(using: .utf8)
+        XCTAssertFalse(dataFromBytes.isEmpty, "二进制 Data 图片生成打印数据不应为空")
         
-        let chunkURL = Chunk.image(url: tempFileURL)
-        let dataURL = chunkURL.data(using: .utf8)
-        XCTAssertFalse(dataURL.isEmpty, "URL 图片生成打印数据不应为空")
-        
-        // 3. 测试 JSON 反序列化对 base64 和 url 两种远程图片字段的全元素支持
-        let jsonWithRemoteImages = """
+        // 3. 测试 JSON 反序列化对 base64 图片字段的支持
+        let jsonWithBase64Image = """
         {
           "autoInitialize": true,
           "autoCut": true,
@@ -662,23 +658,18 @@ class Tests: XCTestCase {
               "base64": "\(rawBase64)",
               "dither": "threshold",
               "threshold": 128
-            },
-            {
-              "type": "image",
-              "url": "\(tempFileURL.absoluteString)",
-              "dither": "floydSteinberg"
             }
           ]
         }
         """
         
         do {
-            let ticket = try Ticket(json: jsonWithRemoteImages)
-            XCTAssertEqual(ticket.chunks.count, 2, "应该成功解析 2 个远程图片区块")
+            let ticket = try Ticket(json: jsonWithBase64Image)
+            XCTAssertEqual(ticket.chunks.count, 1, "应该成功解析 1 个 Base64 图片区块")
             let fullBytes = ticket.bytes()
-            XCTAssertFalse(fullBytes.isEmpty, "解析后的远程图片小票输出字节流不应为空")
+            XCTAssertFalse(fullBytes.isEmpty, "解析后的 Base64 图片小票输出字节流不应为空")
         } catch {
-            XCTFail("远程图片 JSON 解析失败: \(error)")
+            XCTFail("Base64 图片 JSON 解析失败: \(error)")
         }
     }
 }

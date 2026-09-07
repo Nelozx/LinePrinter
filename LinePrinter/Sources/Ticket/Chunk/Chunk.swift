@@ -205,18 +205,6 @@ public extension Chunk {
         return Chunk(Image(base64: base64, dither: dither))
     }
     
-    /// 打印远程网络图片（URL 地址，内置内存缓存）
-    static func image(url: URL?, dither: ImageDitherStyle = .floydSteinberg, timeout: TimeInterval = 5.0) -> Self {
-        guard let url = url else { return .empty }
-        return Chunk(Image(url: url, dither: dither, timeout: timeout))
-    }
-    
-    /// 打印远程网络图片（URL 字符串，内置内存缓存）
-    static func image(url: String?, dither: ImageDitherStyle = .floydSteinberg, timeout: TimeInterval = 5.0) -> Self {
-        guard let url = url, let validURL = URL(string: url) else { return .empty }
-        return Chunk(Image(url: validURL, dither: dither, timeout: timeout))
-    }
-    
     /// 打印二进制文件原始位图（Data 数据）
     static func image(data: Data?, dither: ImageDitherStyle = .floydSteinberg) -> Self {
         guard let data = data else { return .empty }
