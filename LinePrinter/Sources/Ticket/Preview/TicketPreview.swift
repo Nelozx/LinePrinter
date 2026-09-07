@@ -276,11 +276,7 @@ public class ReceiptPreviewView: UIView {
                     case .doubleHeight:
                         isDoubleHeight = true
                     case .alignment(let cmdAlign):
-                        switch cmdAlign {
-                        case .left: alignment = .left
-                        case .center: alignment = .center
-                        case .right: alignment = .right
-                        }
+                        alignment = cmdAlign.nsTextAlignment
                     default:
                         break
                     }
@@ -309,12 +305,7 @@ public class ReceiptPreviewView: UIView {
             label.textColor = UIColor(white: 0.15, alpha: 1.0)
             label.font = ReceiptPreviewView.monospacedFont(ofSize: 12.5, weight: .regular)
             label.numberOfLines = col.isWrapEnabled ? 0 : 1
-            
-            switch col.alignment {
-            case .left: label.textAlignment = .left
-            case .center: label.textAlignment = .center
-            case .right: label.textAlignment = .right
-            }
+            label.textAlignment = col.alignment.nsTextAlignment
             
             // 权重与布局约束
             label.translatesAutoresizingMaskIntoConstraints = false

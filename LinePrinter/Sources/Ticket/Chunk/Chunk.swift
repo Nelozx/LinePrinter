@@ -61,6 +61,11 @@ public struct Chunk: Printable {
             return provider.data(using: encoding)
         }
     }
+    
+    /// 调整当前排版块输出后的进纸点数
+    public func feed(_ points: UInt8) -> Chunk {
+        Chunk(provider, feedPoints: points)
+    }
 }
 
 // MARK: - 声明式 DSL 排版语法糖

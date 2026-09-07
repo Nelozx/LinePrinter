@@ -54,6 +54,15 @@ extension Commands {
         case center = 49
         /// 右对齐
         case right = 50
+        
+        /// 从字符串解析对齐方式（不区分大小写，默认 `.left`）
+        public init(string: String?) {
+            switch string?.lowercased() {
+            case "center": self = .center
+            case "right": self = .right
+            default: self = .left
+            }
+        }
     }
 
     /// 位置对齐
@@ -467,6 +476,21 @@ extension Commands {
         case code93 = 72
         /// CODE128 条码（全 ASCII 字符集）
         case code128 = 73
+        
+        /// 从字符串解析条码码制（默认 `.code128`）
+        public init(string: String?) {
+            switch string?.lowercased() {
+            case "upca": self = .upcA
+            case "upce": self = .upcE
+            case "ean13", "jan13": self = .jan13
+            case "ean8", "jan8": self = .jan8
+            case "code39": self = .code39
+            case "itf": self = .itf
+            case "codabar": self = .codabar
+            case "code93": self = .code93
+            default: self = .code128
+            }
+        }
     }
     /// 打印条码
     /// - **ASCII**: [G S k m d1...dk NUL] / [GS k m n d1...dk]
@@ -641,5 +665,20 @@ public extension Data {
     /// 走纸定位至黑标/标签切缝二进制指令
     static let blackMark = Data(escpos: .feedToBlackMark)
 }
+
+#if canImport(UIKit)
+import UIKit
+extension Commands.Alignment {
+    /// 对应的 iOS UIKit `NSTextAlignment`
+    public var nsTextAlignment: NSTextAlignment {
+        switch self {
+        case .left: return .left
+        case .center: return .center
+        case .right: return .right
+        }
+    }
+}
+#endif
+
 
 

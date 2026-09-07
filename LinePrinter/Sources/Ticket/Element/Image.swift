@@ -26,6 +26,20 @@ public struct Image: Printable {
     public let cgImage: CGImage?
     
     private let rasterData: Data?
+
+    /// 初始化位图打印元素（CoreGraphics CGImage，支持可选值）
+    /// - Parameters:
+    ///   - cgImage: 需要打印的 CGImage 对象（若为 nil 则为空位图）
+    ///   - dither: 抖动算法风格
+    public init(cgImage: CGImage?, dither: ImageDitherStyle = .floydSteinberg) {
+        if let cgImage = cgImage, let mono = cgImage.monochromeBitmap(dither: dither) {
+            self.cgImage = mono.makeCGImage()
+            self.rasterData = mono.rasterData()
+        } else {
+            self.cgImage = cgImage
+            self.rasterData = nil
+        }
+    }
     
     #if canImport(UIKit)
     /// 初始化位图打印元素（iOS / UIKit）
@@ -33,9 +47,7 @@ public struct Image: Printable {
     ///   - image: 需要打印的 UIImage 图片
     ///   - dither: 抖动算法风格（默认为 `.floydSteinberg`，亦可选 `.threshold` 阈值二值化）
     public init(_ image: UIImage, dither: ImageDitherStyle = .floydSteinberg) {
-        let baseCG = image.cgImage
-        self.cgImage = baseCG?.ditheredMonochromeCGImage(dither: dither) ?? baseCG
-        self.rasterData = image.rasterEscPosData(dither: dither)
+        self.init(cgImage: image.cgImage, dither: dither)
     }
     #endif
     
@@ -46,20 +58,10 @@ public struct Image: Printable {
     ///   - dither: 抖动算法风格（默认为 `.floydSteinberg`，亦可选 `.threshold` 阈值二值化）
     public init(_ image: NSImage, dither: ImageDitherStyle = .floydSteinberg) {
         var rect = CGRect(origin: .zero, size: image.size)
-        let baseCG = image.cgImage(forProposedRect: &rect, context: nil, hints: nil)
-        self.cgImage = baseCG?.ditheredMonochromeCGImage(dither: dither) ?? baseCG
-        self.rasterData = image.rasterEscPosData(dither: dither)
+        let cg = image.cgImage(forProposedRect: &rect, context: nil, hints: nil)
+        self.init(cgImage: cg, dither: dither)
     }
     #endif
-
-    /// 初始化位图打印元素（CoreGraphics CGImage）
-    /// - Parameters:
-    ///   - cgImage: 需要打印的 CGImage 对象
-    ///   - dither: 抖动算法风格
-    public init(cgImage: CGImage, dither: ImageDitherStyle = .floydSteinberg) {
-        self.cgImage = cgImage.ditheredMonochromeCGImage(dither: dither) ?? cgImage
-        self.rasterData = cgImage.rasterEscPosData(dither: dither)
-    }
     
     /// 生成光栅位图 ESC/POS 指令流
     /// - Parameter encoding: 字符编码（位图数据不依赖编码，但遵循 `ChunkProvider` 协议规范）

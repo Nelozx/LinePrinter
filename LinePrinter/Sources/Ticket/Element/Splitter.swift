@@ -33,9 +33,12 @@ public struct Splitter: Printable {
     /// - Returns: 编码后的分割线二进制数据
     public func data(using encoding: String.Encoding) -> Data {
         let num = printDensity / fontDensity
-        let content = stride(from: 0, to: num, by: 1).map {
-            String(provider.character(for: $0, total: num) )
-        }.joined()
+        let content: String
+        if let char = provider as? Character {
+            content = String(repeating: char, count: max(0, num))
+        } else {
+            content = (0..<num).map { String(provider.character(for: $0, total: num)) }.joined()
+        }
         return Text(content).data(using: encoding)
     }
     

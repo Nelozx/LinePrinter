@@ -59,69 +59,50 @@ struct ChunkModel: Codable {
 extension ChunkModel {
     /// 将 JSON 数据模型映射转换为实际的 `Chunk` 对象
     func toChunk() -> Chunk? {
-        let feed = feedPoints ?? Chunk.defaultFeedPoints
-        
+        let chunk: Chunk?
         switch type {
         case "text":
             guard let content = content else { return nil }
-            let isBold = bold ?? false
-            var align: Commands.Alignment = .left
-            if alignment == "center" { align = .center }
-            else if alignment == "right" { align = .right }
-            
-            var attrs: [Attribute] = [TextAttribute.alignment(align)]
-            if isBold { attrs.append(TextAttribute.bold) }
-            
-            return Chunk(Text(content, attributes: attrs), feedPoints: feed)
+            chunk = .text(content, bold: bold ?? false, alignment: Commands.Alignment(string: alignment))
             
         case "splitter":
-            let c = (char?.first) ?? "-"
-            return Chunk(Splitter(provider: c, printDensity: printDensity ?? 384, fontDensity: fontDensity ?? 12), feedPoints: feed)
+            chunk = .splitter(char?.first ?? "-", printDensity: printDensity ?? 384, fontDensity: fontDensity ?? 12)
             
         case "twoColumn":
-            let l = left ?? ""
-            let r = right ?? ""
-            return Chunk(Row(totalWidth: totalWidth ?? 32,
-                             Col(l, weight: 1, alignment: .left, wrap: wrap ?? false),
-                             Col(r, weight: 1, alignment: .right)), feedPoints: feed)
+            chunk = .row(left ?? "", right ?? "", totalWidth: totalWidth ?? 32, wrap: wrap ?? false)
             
         case "threeColumn":
-            let c1 = col1 ?? ""
-            let c2 = col2 ?? ""
-            let c3 = col3 ?? ""
-            return Chunk(Row(totalWidth: totalWidth ?? 32,
-                             Col(c1, weight: 2, alignment: .left, wrap: wrap ?? false),
-                             Col(c2, weight: 1, alignment: .center),
-                             Col(c3, weight: 1, alignment: .right)), feedPoints: feed)
+            chunk = .row(col1 ?? "", col2 ?? "", col3 ?? "", totalWidth: totalWidth ?? 32, wrap: wrap ?? false)
+            
+        case "row":
+            if let c3 = col3 {
+                chunk = .row(col1 ?? "", col2 ?? "", c3, totalWidth: totalWidth ?? 32, wrap: wrap ?? false)
+            } else {
+                chunk = .row(left ?? col1 ?? "", right ?? col2 ?? "", totalWidth: totalWidth ?? 32, wrap: wrap ?? false)
+            }
             
         case "barcode":
             guard let content = content else { return nil }
-            var bType: Commands.BarCodeType = .code128
-            if barcodeType == "upcA" { bType = .upcA }
-            else if barcodeType == "ean13" || barcodeType == "jan13" { bType = .jan13 }
-            return Chunk(BarCode(content, type: bType, height: height ?? 64, width: width ?? 2, hri: .below), feedPoints: feed)
+            chunk = .barcode(content, type: Commands.BarCodeType(string: barcodeType), height: height ?? 64, width: width ?? 2)
             
         case "qrcode":
             guard let content = content else { return nil }
-            return Chunk(QRCode(content), feedPoints: feed)
+            chunk = .qrcode(content)
             
         case "image":
             guard let name = name else { return nil }
             #if canImport(UIKit)
-            if let img = UIImage(named: name) {
-                return Chunk(Image(img, dither: .floydSteinberg), feedPoints: feed)
-            }
+            chunk = .image(UIImage(named: name))
             #elseif canImport(AppKit) && !targetEnvironment(macCatalyst)
-            if let img = NSImage(named: name) {
-                return Chunk(Image(img, dither: .floydSteinberg), feedPoints: feed)
-            }
+            chunk = .image(NSImage(named: name))
+            #else
+            chunk = nil
             #endif
-            return nil
             
         case "feed":
             return .feed(lines ?? 1)
             
-        case "buzzer":
+        case "buzzer", "beep":
             return .beep(times ?? 1)
             
         case "cut":
@@ -139,5 +120,10 @@ extension ChunkModel {
         default:
             return nil
         }
+        
+        if let feed = feedPoints, let valid = chunk {
+            return valid.feed(feed)
+        }
+        return chunk
     }
 }
