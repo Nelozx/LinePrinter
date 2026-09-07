@@ -156,7 +156,8 @@ public extension Chunk {
     /// ```swift
     /// .splitter(char: "=")
     /// ```
-    static func splitter(char: Character = "-", printDensity: Int = 384, fontDensity: Int = 12) -> Self {
+    /// 自定义字符分割线
+    static func splitter(_ char: Character = "-", printDensity: Int = 384, fontDensity: Int = 12) -> Self {
         Chunk(Splitter(provider: char, printDensity: printDensity, fontDensity: fontDensity))
     }
     
@@ -167,16 +168,6 @@ public extension Chunk {
     
     #if canImport(UIKit)
     /// 打印位图（iOS UIKit）
-    ///
-    /// 将 `UIImage` 转换为 ESC/POS 标准单色光栅位图指令（`GS v 0`），可清晰还原 Logo 或图形层次。若传入 `nil` 则自动转换为空块。
-    /// - Parameters:
-    ///   - image: 需要打印的可选 UIImage 对象
-    ///   - dither: 二值化处理方式，默认 `.floydSteinberg` 误差扩散抖动（适合照片或渐变图形），亦可选用 `.threshold(128)` 灰度阈值法（适合纯黑白线条 Logo）
-    /// - Returns: 位图排版块
-    ///
-    /// ```swift
-    /// .image(logoImage, dither: .floydSteinberg)
-    /// ```
     static func image(_ image: UIImage?, dither: ImageDitherStyle = .floydSteinberg) -> Self {
         guard let image = image else { return .empty }
         return Chunk(Image(image, dither: dither))
@@ -197,69 +188,37 @@ public extension Chunk {
         return Chunk(Image(cgImage: cgImage, dither: dither))
     }
     
-    /// 自定义多列排版行
-    ///
-    /// 支持指定总列宽及各列权重比例或固定宽度，精准控制每列文本居左/居中/居右对齐。
-    /// - Parameters:
-    ///   - totalWidth: 行总字符宽度，58mm 纸宽通常填 32，80mm 纸宽通常填 48，默认为 32
-    ///   - columns: 列配置列表（`Line`）
-    /// - Returns: 多列排版行块
-    ///
-    /// ```swift
-    /// .row(totalWidth: 32,
-    ///      Line("品名", weight: 2, alignment: .left),
-    ///      Line("数量", weight: 1, alignment: .center),
-    ///      Line("金额", weight: 1, alignment: .right))
-    /// ```
+    /// 多列自定义排版行
     static func row(totalWidth: Int = 32, _ columns: Line...) -> Self {
         Chunk(Row(totalWidth: totalWidth, columns: columns))
     }
-    
-    /// 快速双列左右两端对齐排版
-    ///
-    /// 常用于小票账单金额汇总、单号与时间的排版（左侧品名/标签居左，右侧金额/数值居右）。
-    /// - Parameters:
-    ///   - left: 左侧文本内容
-    ///   - right: 右侧文本内容
-    ///   - totalWidth: 行总字符宽度，58mm 纸宽默认 32，80mm 纸宽填 48
-    ///   - wrap: 左侧文本超出宽度时是否自动智能折行，默认为 `false`
-    /// - Returns: 双列排版块
-    ///
-    /// ```swift
-    /// .twoColumn("实付金额", "￥40.00")
-    /// ```
-    static func twoColumn(_ left: String, _ right: String, totalWidth: Int = 32, wrap: Bool = false) -> Self {
+
+    /// 快捷双列排版（左侧居左，右侧居右）
+    static func row(_ left: String, _ right: String, totalWidth: Int = 32, wrap: Bool = false) -> Self {
         Chunk(Row(totalWidth: totalWidth,
                   Line(left, weight: 1, alignment: .left, wrap: wrap),
                   Line(right, weight: 1, alignment: .right)))
     }
     
-    /// 快速三列排版（左品名，中数量，右金额）
-    ///
-    /// 餐饮及零售小票最常用的明细排版结构。品名占 2 权重居左，数量占 1 权重居中，金额占 1 权重居右。
-    /// - Parameters:
-    ///   - col1: 第一列文本（品名）
-    ///   - col2: 第二列文本（数量/规格）
-    ///   - col3: 第三列文本（金额/小计）
-    ///   - totalWidth: 行总字符宽度，58mm 纸宽默认 32，80mm 纸宽填 48
-    ///   - wrap: 超长品名是否自动折行，开启后品名超长会自动换行且保证数量与金额垂直对齐，默认为 `false`
-    /// - Returns: 三列排版块
-    ///
-    /// ```swift
-    /// .threeColumn("招牌老坛酸菜黑鱼饭(大份)", "x1", "38.00", wrap: true)
-    /// ```
-    static func threeColumn(_ col1: String, _ col2: String, _ col3: String, totalWidth: Int = 32, wrap: Bool = false) -> Self {
+    /// 快捷三列排版（左品名 2 权重，中数量 1 权重，右金额 1 权重）
+    static func row(_ col1: String, _ col2: String, _ col3: String, totalWidth: Int = 32, wrap: Bool = false) -> Self {
         Chunk(Row(totalWidth: totalWidth,
                   Line(col1, weight: 2, alignment: .left, wrap: wrap),
                   Line(col2, weight: 1, alignment: .center),
                   Line(col3, weight: 1, alignment: .right)))
     }
+
+    /// 双列排版（别名支持）
+    static func twoColumn(_ left: String, _ right: String, totalWidth: Int = 32, wrap: Bool = false) -> Self {
+        row(left, right, totalWidth: totalWidth, wrap: wrap)
+    }
+    
+    /// 三列排版（别名支持）
+    static func threeColumn(_ col1: String, _ col2: String, _ col3: String, totalWidth: Int = 32, wrap: Bool = false) -> Self {
+        row(col1, col2, col3, totalWidth: totalWidth, wrap: wrap)
+    }
     
     /// 垂直块分组容器
-    ///
-    /// 将多个 Chunk 顺序组合为一个连续的逻辑单元。
-    /// - Parameter elements: 包含的排版块集合
-    /// - Returns: 分组排版块
     static func group(_ elements: Chunk...) -> Self {
         Chunk(ChunkGroup(elements))
     }
@@ -274,26 +233,33 @@ public extension Chunk {
     static var feedAndCut: Self { Chunk(Data.feedAndCut, feedPoints: 0) }
     
     /// 弹出收银钱箱
-    static var openDrawer: Self { Chunk(Data.openDrawer, feedPoints: 0) }
+    static var drawer: Self { Chunk(Data.drawer, feedPoints: 0) }
+    static var openDrawer: Self { drawer }
     
     /// 走纸指定行数
-    static func feed(lines: UInt8 = 1) -> Self {
+    static func feed(_ lines: UInt8 = 1) -> Self {
         Chunk(Data(escpos: .printAndFeed(lines: lines)), feedPoints: 0)
     }
     
-    /// 蜂鸣器发声提示块（后厨出单提醒、外卖催单）
-    static func buzzer(times: UInt8 = 1, duration: UInt8 = 2) -> Self {
+    /// 蜂鸣器发声提示块（后厨催单、出单提醒）
+    static func beep(_ times: UInt8 = 1, duration: UInt8 = 2) -> Self {
         Chunk(Data.buzzer(times: times, duration: duration), feedPoints: 0)
     }
-    
-    /// 设置自定义行间距（紧凑排版/节省纸张）
-    static func lineSpacing(_ points: UInt8) -> Self {
-        Chunk(Data.lineSpacing(points), feedPoints: 0)
+    static func buzzer(_ times: UInt8 = 1, duration: UInt8 = 2) -> Self {
+        beep(times, duration: duration)
     }
     
-    /// 恢复出厂默认行间距（约 30 点阵）
-    static var defaultLineSpacing: Self { Chunk(Data.defaultLineSpacing, feedPoints: 0) }
+    /// 设置自定义行间距（点阵数）
+    static func spacing(_ points: UInt8) -> Self {
+        Chunk(Data.spacing(points), feedPoints: 0)
+    }
+    static func lineSpacing(_ points: UInt8) -> Self { spacing(points) }
     
-    /// 进纸定位至黑标/标签缝隙（标签小票机专用）
-    static var feedToBlackMark: Self { Chunk(Data.feedToBlackMark, feedPoints: 0) }
+    /// 恢复出厂默认行间距
+    static var defaultSpacing: Self { Chunk(Data.defaultSpacing, feedPoints: 0) }
+    static var defaultLineSpacing: Self { defaultSpacing }
+    
+    /// 进纸定位至黑标/标签缝隙
+    static var blackMark: Self { Chunk(Data.blackMark, feedPoints: 0) }
+    static var feedToBlackMark: Self { blackMark }
 }

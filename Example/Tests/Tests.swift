@@ -115,7 +115,7 @@ class Tests: XCTestCase {
                 .twoColumn("冰红茶", "￥5.00"),
                 .splitter,
                 .twoColumn("合计", "￥40.00"),
-                .feed(lines: 3)
+                .feed(3)
             ],
             autoInitialize: true,
             autoCut: true
@@ -327,11 +327,11 @@ class Tests: XCTestCase {
         // 6. DSL 语法糖组装测试
         let ticket = Ticket(
             chunks: [
-                .lineSpacing(20),
+                .spacing(20),
                 .barcode("12345678", type: .code128, hri: .below),
-                .defaultLineSpacing,
-                .buzzer(times: 2),
-                .feedToBlackMark
+                .defaultSpacing,
+                .beep(2),
+                .blackMark
             ]
         )
         let data = ticket.bytes(using: .gbk)
@@ -350,9 +350,9 @@ class Tests: XCTestCase {
             chunks: [
                 .image(demoImage, dither: .floydSteinberg),
                 .text("味美餐饮店", bold: true, alignment: .center),
-                .splitter(char: "-"),
-                .threeColumn("老坛黑鱼饭", "x1", "38.00", wrap: true),
-                .twoColumn("实付金额", "￥38.00"),
+                .splitter("-"),
+                .row("老坛黑鱼饭", "x1", "38.00", wrap: true),
+                .row("实付金额", "￥38.00"),
                 .qrcode("https://test.com"),
                 .barcode("123456", type: .code128, hri: .below)
             ],
@@ -361,16 +361,16 @@ class Tests: XCTestCase {
         )
         
         // 1. 生成 58mm 预览视图
-        let view58 = ticket.previewView(paperWidth: .mm58)
+        let view58 = ticket.preview(paperWidth: ReceiptPaperWidth.mm58)
         XCTAssertNotNil(view58)
-        XCTAssertEqual(view58.paperWidth, .mm58)
+        XCTAssertEqual(view58.paperWidth, ReceiptPaperWidth.mm58)
         
         // 2. 切换为 80mm 规格
-        view58.paperWidth = .mm80
-        XCTAssertEqual(view58.paperWidth, .mm80)
+        view58.paperWidth = ReceiptPaperWidth.mm80
+        XCTAssertEqual(view58.paperWidth, ReceiptPaperWidth.mm80)
         
         // 3. 导出小票静态长图
-        let image = ticket.previewImage(paperWidth: .mm58)
+        let image = ticket.image(paperWidth: ReceiptPaperWidth.mm58)
         XCTAssertNotNil(image, "小票长图生成不应为 nil")
         if let img = image {
             XCTAssertGreaterThan(img.size.width, 0)
@@ -378,9 +378,9 @@ class Tests: XCTestCase {
         }
         
         // 4. 纸张规格与内容更新
-        let view80 = ticket.previewView(paperWidth: .mm80)
+        let view80 = ticket.preview(paperWidth: ReceiptPaperWidth.mm80)
         XCTAssertNotNil(view80)
-        XCTAssertEqual(view80.paperWidth, .mm80)
+        XCTAssertEqual(view80.paperWidth, ReceiptPaperWidth.mm80)
         #endif
     }
     // MARK: - JSON 数据驱动解析测试
@@ -432,7 +432,7 @@ class Tests: XCTestCase {
             .text("收银员: 01号"),
             .splitter,
             .threeColumn("品名", "数量", "金额"),
-            .splitter(char: "-"),
+            .splitter("-"),
             .threeColumn("招牌老坛酸菜黑鱼饭(大份)", "x1", "38.00", wrap: true),
             .threeColumn("秘制香辣鸭头", "x2", "16.00"),
             .threeColumn("冰镇大麦若叶汁", "x1", "8.00"),
@@ -449,7 +449,7 @@ class Tests: XCTestCase {
             .blank
         ).autoCut()
         
-        let img58 = ticket58.previewImage(paperWidth: .mm58)
+        let img58 = ticket58.image(paperWidth: .mm58)
         XCTAssertNotNil(img58, "58mm 小票长图渲染失败")
         XCTAssertGreaterThan(img58?.size.width ?? 0, 0)
         XCTAssertGreaterThan(img58?.size.height ?? 0, 0)
@@ -458,21 +458,21 @@ class Tests: XCTestCase {
             .text("精品生活大型商超购物小票", bold: true, alignment: .center),
             .text("门店: 科技园旗舰总店", alignment: .center),
             .splitter,
-            .threeColumn("商品名称/条码", "单价/数量", "金额", totalWidth: 48, wrap: true),
-            .splitter(char: "="),
-            .threeColumn("波士顿冷冻大龙虾 500g", "128.00 x 2", "256.00", totalWidth: 48, wrap: true),
-            .threeColumn("进口有机特级初榨橄榄油 1L", "88.00 x 1", "88.00", totalWidth: 48, wrap: true),
-            .threeColumn("日本青森红富士苹果礼盒", "59.90 x 1", "59.90", totalWidth: 48, wrap: true),
+            .row("商品名称/条码", "单价/数量", "金额", totalWidth: 48, wrap: true),
+            .splitter("="),
+            .row("波士顿冷冻大龙虾 500g", "128.00 x 2", "256.00", totalWidth: 48, wrap: true),
+            .row("进口有机特级初榨橄榄油 1L", "88.00 x 1", "88.00", totalWidth: 48, wrap: true),
+            .row("日本青森红富士苹果礼盒", "59.90 x 1", "59.90", totalWidth: 48, wrap: true),
             .splitter,
-            .twoColumn("商品总计", "￥403.90", totalWidth: 48),
-            .twoColumn("限时尊享折上折", "-￥53.90", totalWidth: 48),
-            .twoColumn("应收金额", "￥350.00", totalWidth: 48),
+            .row("商品总计", "￥403.90", totalWidth: 48),
+            .row("限时尊享折上折", "-￥53.90", totalWidth: 48),
+            .row("应收金额", "￥350.00", totalWidth: 48),
             .splitter,
             .barcode("6901234567890"),
             .blank
         ).autoCut()
         
-        let img80 = ticket80.previewImage(paperWidth: .mm80)
+        let img80 = ticket80.image(paperWidth: .mm80)
         XCTAssertNotNil(img80, "80mm 小票长图渲染失败")
         XCTAssertGreaterThan(img80?.size.width ?? 0, 0)
         XCTAssertGreaterThan(img80?.size.height ?? 0, 0)

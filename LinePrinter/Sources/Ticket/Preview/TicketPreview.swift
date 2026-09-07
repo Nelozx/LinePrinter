@@ -524,31 +524,17 @@ public class ReceiptPreviewView: UIView {
 
 public extension Ticket {
     
-    /// 创建并获取当前小票的 UI 视觉预览视图（`ReceiptPreviewView`）
-    /// - Parameter paperWidth: 纸张宽度（默认 58mm）
-    /// - Returns: 高保真小票渲染 UIView，调用方可自由放置于任意 UI 容器中进行展示或自行实现动画
-    ///
-    /// ```swift
-    /// let preview = ticket.previewView(paperWidth: .mm58)
-    /// myContainerView.addSubview(preview)
-    /// ```
-    func previewView(paperWidth: ReceiptPaperWidth = .mm58) -> ReceiptPreviewView {
+    /// 获取当前小票的 UI 视觉预览视图（`ReceiptPreviewView`）
+    func preview(paperWidth: ReceiptPaperWidth = .mm58) -> ReceiptPreviewView {
         ReceiptPreviewView(ticket: self, paperWidth: paperWidth)
+    }
+    func previewView(paperWidth: ReceiptPaperWidth = .mm58) -> ReceiptPreviewView {
+        preview(paperWidth: paperWidth)
     }
     
     /// 将小票渲染并导出为一张高清晰度长图 `UIImage`
-    /// - Parameters:
-    ///   - paperWidth: 纸张宽度（默认 58mm）
-    ///   - scale: 图像导出渲染缩放倍率（默认 2.0x 视网膜高清度）
-    /// - Returns: 完整渲染长图 UIImage
-    ///
-    /// ```swift
-    /// if let image = ticket.previewImage() {
-    ///     // 保存相册或调用分享
-    /// }
-    /// ```
-    func previewImage(paperWidth: ReceiptPaperWidth = .mm58, scale: CGFloat = 2.0) -> UIImage? {
-        let view = ReceiptPreviewView(ticket: self, paperWidth: paperWidth)
+    func image(paperWidth: ReceiptPaperWidth = .mm58, scale: CGFloat = 2.0) -> UIImage? {
+        let view = preview(paperWidth: paperWidth)
         let targetWidth = paperWidth.points
         
         let fittingSize = view.systemLayoutSizeFitting(
@@ -566,6 +552,9 @@ public extension Ticket {
         return renderer.image { ctx in
             view.layer.render(in: ctx.cgContext)
         }
+    }
+    func previewImage(paperWidth: ReceiptPaperWidth = .mm58, scale: CGFloat = 2.0) -> UIImage? {
+        image(paperWidth: paperWidth, scale: scale)
     }
 }
 #endif

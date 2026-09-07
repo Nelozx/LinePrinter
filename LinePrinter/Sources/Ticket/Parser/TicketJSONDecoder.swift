@@ -119,10 +119,10 @@ extension ChunkModel {
             return nil
             
         case "feed":
-            return .feed(lines: lines ?? 1)
+            return .feed(lines ?? 1)
             
         case "buzzer":
-            return .buzzer(times: times ?? 1, duration: 2)
+            return .beep(times ?? 1)
             
         case "cut":
             return .cut

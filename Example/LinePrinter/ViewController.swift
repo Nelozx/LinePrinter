@@ -63,46 +63,46 @@ class ViewController: UIViewController {
         
         return LinePrinter.ticket(
             // 1. 顶部行间距与蜂鸣器设置
-            .lineSpacing(22),
+            .spacing(22),
             // 2. 顶部 Logo 图案 (单色位图抖动打印)
             .image(logoImage, dither: .floydSteinberg),
             // 3. 店铺名与单号时间
             .text("味美餐饮旗舰店", bold: true, alignment: .center),
             .text("-- 欢迎光临 --", attributes: [TextAttribute.alignment(.center)]),
-            .splitter(char: "-", printDensity: printDensity),
+            .splitter("-", printDensity: printDensity),
             .text("单号：NO.20260907001"),
             .text("时间：2026-09-07 12:30:00"),
             .text("收银员：01号"),
-            .splitter(char: "-", printDensity: printDensity),
+            .splitter("-", printDensity: printDensity),
             // 3. 三列明细表头
             .row(totalWidth: totalWidth,
                  Line("品名", weight: 2, alignment: .left),
                  Line("数量", weight: 1, alignment: .center),
                  Line("金额", weight: 1, alignment: .right)),
-            .splitter(char: "-", printDensity: printDensity),
-            // 5. 菜品列表（开启智能折行 wrap: true）
-            .threeColumn("招牌老坛酸菜无骨黑鱼饭(大份)", "x1", "38.00", totalWidth: totalWidth, wrap: true),
-            .threeColumn("秘制香辣鸭头", "x2", "16.00", totalWidth: totalWidth, wrap: true),
-            .threeColumn("冰镇大麦若叶汁", "x1", "8.00", totalWidth: totalWidth, wrap: true),
-            .splitter(char: "-", printDensity: printDensity),
-            // 6. 账单汇总
-            .twoColumn("原价合计", "￥62.00", totalWidth: totalWidth),
-            .twoColumn("会员优惠券", "-￥12.00", totalWidth: totalWidth),
-            .twoColumn("实付金额", "￥50.00", totalWidth: totalWidth),
-            .splitter(char: "=", printDensity: printDensity),
+            .splitter("-", printDensity: printDensity),
+            // 5. 菜品列表（直接使用统一的 .row，开启智能折行 wrap: true）
+            .row("招牌老坛酸菜无骨黑鱼饭(大份)", "x1", "38.00", totalWidth: totalWidth, wrap: true),
+            .row("秘制香辣鸭头", "x2", "16.00", totalWidth: totalWidth, wrap: true),
+            .row("冰镇大麦若叶汁", "x1", "8.00", totalWidth: totalWidth, wrap: true),
+            .splitter("-", printDensity: printDensity),
+            // 6. 账单汇总（直接使用统一的 .row）
+            .row("原价合计", "￥62.00", totalWidth: totalWidth),
+            .row("会员优惠券", "-￥12.00", totalWidth: totalWidth),
+            .row("实付金额", "￥50.00", totalWidth: totalWidth),
+            .splitter("=", printDensity: printDensity),
             // 7. 支付信息与加粗取餐号
             .text("支付方式：微信支付"),
             .text("【取餐号：A088】", bold: true, alignment: .center),
-            .splitter(char: "-", printDensity: printDensity),
+            .splitter("-", printDensity: printDensity),
             // 8. 电子发票二维码与一维条码（带下方 HRI 数字）
             .text("扫码开具增值税电子发票", attributes: [TextAttribute.alignment(.center)]),
             .qrcode("https://weixin.qq.com/r/lineprinter_demo"),
             .barcode("20260907001", type: .code128, height: 60, width: 2, hri: .below),
             // 9. 结尾问候与出单提示
             .text("多谢惠顾，欢迎再次光临！", attributes: [TextAttribute.alignment(.center)]),
-            .defaultLineSpacing,
-            .buzzer(times: 2),
-            .feed(lines: 2)
+            .defaultSpacing,
+            .beep(2),
+            .feed(2)
         ).autoCut()
     }
 
@@ -120,7 +120,7 @@ class ViewController: UIViewController {
             existingPreview.paperWidth = paperWidth
             existingPreview.updateTicket(ticket)
         } else {
-            let preview = ticket.previewView(paperWidth: paperWidth)
+            let preview = ticket.preview(paperWidth: paperWidth)
             preview.translatesAutoresizingMaskIntoConstraints = false
             contentView.addSubview(preview)
             receiptPreviewView = preview
@@ -238,8 +238,8 @@ class ViewController: UIViewController {
         guard let ticket = currentTicket else { return }
         let width: ReceiptPaperWidth = (currentPaperWidth == 32) ? .mm58 : .mm80
         
-        // 调用原生 previewImage 导出长图
-        guard let image = ticket.previewImage(paperWidth: width) else { return }
+        // 调用原生 image 导出长图
+        guard let image = ticket.image(paperWidth: width) else { return }
         
         let activityVC = UIActivityViewController(activityItems: [image], applicationActivities: nil)
         if let popover = activityVC.popoverPresentationController {

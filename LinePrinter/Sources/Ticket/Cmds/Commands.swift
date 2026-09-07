@@ -526,7 +526,8 @@ public extension Data {
         self.init(cmds.reduce([], { $0 + $1.rawValue }))
     }
     /// 开钱箱指令数据
-    static let openDrawer = Data(escpos: .drawerKick(m: 48, t1: 10, t2: 10))
+    static let drawer = Data(escpos: .drawerKick(m: 48, t1: 10, t2: 10))
+    static var openDrawer: Data { drawer }
     
     /// 结束输出
     static let endOutput = Data(escpos: Commands([250]))
@@ -631,15 +632,18 @@ public extension Data {
     }
     
     /// 恢复默认行间距二进制指令
-    static let defaultLineSpacing = Data(escpos: .defaultLineSpacing)
+    static let defaultSpacing = Data(escpos: .defaultLineSpacing)
+    static var defaultLineSpacing: Data { defaultSpacing }
     
     /// 设置行间距二进制指令
-    static func lineSpacing(_ points: UInt8) -> Data {
+    static func spacing(_ points: UInt8) -> Data {
         Data(escpos: .lineSpacing(points))
     }
+    static func lineSpacing(_ points: UInt8) -> Data { spacing(points) }
     
     /// 走纸定位至黑标/标签切缝二进制指令
-    static let feedToBlackMark = Data(escpos: .feedToBlackMark)
+    static let blackMark = Data(escpos: .feedToBlackMark)
+    static var feedToBlackMark: Data { blackMark }
 }
 
 

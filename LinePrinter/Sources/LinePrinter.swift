@@ -58,58 +58,37 @@ public enum LinePrinter {
         Ticket(chunks: chunks).bytes(using: encoding)
     }
     
-    /// 解析打印机回传的标准 ESC/POS 实时硬件状态字节（实时查询或 DLE EOT 回执）
-    ///
-    /// - Parameter byte: 打印机返回的原始字节（如通过蓝牙特征值通知或 Socket 读取到的单字节）
-    /// - Returns: 解析后的结构化状态（可使用 `.contains(.paperEmpty)`、`.contains(.coverOpen)` 判断）
-    ///
-    /// ```swift
-    /// let status = LinePrinter.parseStatus(byte: 0x60)
-    /// if status.contains(.paperEmpty) {
-    ///     print("⚠️ 打印机缺纸！")
-    /// }
-    /// ```
-    public static func parseStatus(byte: UInt8) -> PrinterHardwareStatus {
+    /// 解析打印机硬件实时状态
+    public static func status(_ byte: UInt8) -> PrinterHardwareStatus {
         PrinterHardwareStatus.parse(byte: byte)
     }
+    public static func parseStatus(byte: UInt8) -> PrinterHardwareStatus { status(byte) }
     
     #if canImport(UIKit)
-    /// 将 `UIImage` 转换为 ESC/POS 标准光栅位图指令数据流（`GS v 0`）
-    ///
-    /// 内部自动提取 32 位 RGBA 像素、计算灰度并执行二值化抖动，输出可直接写入小票机的二进制数据。
-    /// - Parameters:
-    ///   - image: 待转换的 UIImage 图片对象
-    ///   - dither: 二值化抖动风格，默认为 `.floydSteinberg` 误差扩散抖动
-    /// - Returns: ESC/POS 光栅指令数据 `Data`，若转换失败或尺寸无效则返回 `nil`
-    ///
-    /// ```swift
-    /// if let rasterBytes = LinePrinter.imageRasterData(from: myLogoImage) {
-    ///     myTransport.write(rasterBytes)
-    /// }
-    /// ```
-    public static func imageRasterData(
-        from image: UIImage,
-        dither: ImageDitherStyle = .floydSteinberg
-    ) -> Data? {
+    /// 将 `UIImage` 转换为 ESC/POS 光栅位图数据
+    public static func rasterData(from image: UIImage, dither: ImageDitherStyle = .floydSteinberg) -> Data? {
         image.rasterEscPosData(dither: dither)
+    }
+    public static func imageRasterData(from image: UIImage, dither: ImageDitherStyle = .floydSteinberg) -> Data? {
+        rasterData(from: image, dither: dither)
     }
     #endif
 
     #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-    /// 将 `NSImage` 转换为 ESC/POS 标准光栅位图指令数据流（`GS v 0`）
-    public static func imageRasterData(
-        from image: NSImage,
-        dither: ImageDitherStyle = .floydSteinberg
-    ) -> Data? {
+    /// 将 `NSImage` 转换为 ESC/POS 光栅位图数据
+    public static func rasterData(from image: NSImage, dither: ImageDitherStyle = .floydSteinberg) -> Data? {
         image.rasterEscPosData(dither: dither)
+    }
+    public static func imageRasterData(from image: NSImage, dither: ImageDitherStyle = .floydSteinberg) -> Data? {
+        rasterData(from: image, dither: dither)
     }
     #endif
 
-    /// 将 `CGImage` 转换为 ESC/POS 标准光栅位图指令数据流（`GS v 0`）
-    public static func imageRasterData(
-        from cgImage: CGImage,
-        dither: ImageDitherStyle = .floydSteinberg
-    ) -> Data? {
+    /// 将 `CGImage` 转换为 ESC/POS 光栅位图数据
+    public static func rasterData(from cgImage: CGImage, dither: ImageDitherStyle = .floydSteinberg) -> Data? {
         cgImage.rasterEscPosData(dither: dither)
+    }
+    public static func imageRasterData(from cgImage: CGImage, dither: ImageDitherStyle = .floydSteinberg) -> Data? {
+        rasterData(from: cgImage, dither: dither)
     }
 }
