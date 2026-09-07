@@ -155,21 +155,36 @@ class ViewController: UIViewController {
           "autoCut": true,
           "autoInitialize": true,
           "chunks": [
-            { "type": "text", "content": "JSON 动态下发小票", "bold": true, "alignment": "center" },
+            { "type": "text", "content": "★ 云端动态结账单 ★", "bold": true, "alignment": "center", "size": "double" },
             { "type": "splitter", "char": "=" },
-            { "type": "twoColumn", "left": "订单号", "right": "JSON-001" },
-            { "type": "twoColumn", "left": "支付方式", "right": "微信支付" },
+            { "type": "twoColumn", "left": "单号: NO.20260908001", "right": "收银员: 08" },
             { "type": "splitter", "char": "-" },
-            { "type": "threeColumn", "col1": "云端动态商品名", "col2": "x2", "col3": "19.90", "wrap": true },
-            { "type": "threeColumn", "col1": "附加服务费", "col2": "x1", "col3": "2.00", "wrap": true },
+            {
+              "type": "row",
+              "totalWidth": 32,
+              "columns": [
+                { "text": "招牌老坛酸菜无骨鱼饭(大份)", "weight": 2, "wrap": true },
+                { "text": "x1", "weight": 1, "alignment": "center" },
+                { "text": "38.00", "weight": 1, "alignment": "right" }
+              ]
+            },
+            {
+              "type": "row",
+              "totalWidth": 32,
+              "columns": [
+                { "text": "桂花乌龙冰茶", "weight": 2, "wrap": true },
+                { "text": "x2", "weight": 1, "alignment": "center" },
+                { "text": "24.00", "weight": 1, "alignment": "right" }
+              ]
+            },
             { "type": "splitter", "char": "-" },
-            { "type": "twoColumn", "left": "总计", "right": "￥21.90" },
-            { "type": "text", "content": "扫码获取电子发票", "alignment": "center" },
-            { "type": "qrcode", "content": "https://json.example.com" },
-            { "type": "barcode", "content": "666888", "barcodeType": "code128" },
-            { "type": "text", "content": "本小票完全由纯 JSON 文本驱动生成\\n告别硬编码！", "alignment": "center" },
-            { "type": "feed", "lines": 3 },
-            { "type": "buzzer", "times": 1 }
+            { "type": "twoColumn", "left": "实付金额", "right": "￥62.00" },
+            { "type": "text", "content": "扫码下载电子发票", "alignment": "center" },
+            { "type": "qrcode", "content": "https://lineprinter.dev" },
+            { "type": "barcode", "content": "20260908888", "barcodeType": "code128", "height": 50, "hri": "below" },
+            { "type": "text", "content": "告别硬编码！\\n服务端全元素动态配置", "alignment": "center" },
+            { "type": "feed", "lines": 2 },
+            { "type": "beep", "times": 1 }
           ]
         }
         """

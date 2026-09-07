@@ -112,21 +112,46 @@ myPeripheral.writeValue(data, for: myCharacteristic, type: .withoutResponse)
 
 ---
 
-### 方式 2：服务端动态驱动 JSON 排版（热更新免发版）
+### 方式 2：服务端动态驱动 JSON 排版（全元素覆盖 / 热更新免发版）
 
-支持云端或后端微服务直接下发标准 JSON 模板，App 本地直接渲染成小票：
+支持云端或后端微服务直接下发标准 JSON 模板，**完整覆盖所有文本样式、自定义多列、动态 Base64 图片、条码/二维码与全部控制指令**：
 
 ```swift
-// 1. 从服务端下发的 JSON 字符串构建小票
+// 1. 从服务端下发的 JSON 字符串构建小票（支持全元素与指令）
 let jsonString = """
 {
   "autoInitialize": true,
   "autoCut": true,
   "chunks": [
-    { "type": "text", "text": "云端动态结账单", "bold": true, "alignment": "center" },
-    { "type": "splitter" },
-    { "type": "twoColumn", "left": "应收金额", "right": "￥98.00" },
+    // 文本（支持加粗、尺寸倍数、下划线、反白）
+    { "type": "text", "content": "大号居中标题", "bold": true, "alignment": "center", "size": "double" },
+    { "type": "text", "content": "反白居右文本", "alignment": "right", "reverse": true },
+    // 分割线
+    { "type": "splitter", "char": "-", "printDensity": 384 },
+    // 多列排版（支持任意多列数组、权重分配与超长智能折行）
+    {
+      "type": "row",
+      "totalWidth": 32,
+      "columns": [
+        { "text": "老坛酸菜无骨鱼(大份)", "weight": 2, "wrap": true },
+        { "text": "x1", "weight": 1, "alignment": "center" },
+        { "text": "38.00", "weight": 1, "alignment": "right" }
+      ]
+    },
+    // 简化双列 / 三列
+    { "type": "twoColumn", "left": "实付金额", "right": "￥38.00" },
+    // 点阵二维码与一维条形码（支持指定高度与 HRI 位置）
     { "type": "qrcode", "content": "https://lineprinter.dev" },
+    { "type": "barcode", "content": "20260908001", "barcodeType": "code128", "height": 60, "hri": "below" },
+    // 图片（支持远程 Base64 数据或本地图片名，支持误差扩散与阈值抖动）
+    { "type": "image", "base64": "iVBORw0KGgo...", "dither": "floydSteinberg" },
+    // 组合容器与空白占位
+    { "type": "blank" },
+    // 硬件控制指令
+    { "type": "spacing", "points": 24 },
+    { "type": "beep", "times": 2, "duration": 3 },
+    { "type": "drawer" },
+    { "type": "feed", "lines": 2 },
     { "type": "cut" }
   ]
 }

@@ -525,6 +525,16 @@ extension Commands {
         case below = 2
         /// 打印在条码上方与下方
         case both = 3
+        
+        /// 从字符串解析 HRI 打印位置（默认 `.below`）
+        public init(string: String?) {
+            switch string?.lowercased() {
+            case "none": self = .none
+            case "above": self = .above
+            case "both": self = .both
+            default: self = .below
+            }
+        }
     }
     
     /// 设置条形码 HRI 字符打印位置

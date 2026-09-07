@@ -383,17 +383,48 @@ class Tests: XCTestCase {
         XCTAssertEqual(view80.paperWidth, ReceiptPaperWidth.mm80)
         #endif
     }
-    // MARK: - JSON 数据驱动解析测试
+    // MARK: - JSON 数据驱动全元素解析覆盖测试
     func testJSONToTicketDecoding() {
+        let onePixelBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
+        
         let jsonString = """
         {
           "autoCut": true,
           "autoInitialize": true,
           "chunks": [
-            { "type": "text", "content": "JSON 测试", "bold": true, "alignment": "center" },
-            { "type": "splitter", "char": "*" },
-            { "type": "twoColumn", "left": "商品", "right": "￥10.00" },
-            { "type": "feed", "lines": 3 }
+            { "type": "text", "content": "大号居中标题", "bold": true, "alignment": "center", "size": "double", "underline": 1 },
+            { "type": "text", "content": "反白居右文本", "alignment": "right", "reverse": true },
+            { "type": "splitter", "char": "=", "printDensity": 384 },
+            { "type": "twoColumn", "left": "双列左", "right": "双列右" },
+            { "type": "threeColumn", "col1": "菜品", "col2": "x1", "col3": "28.00", "wrap": true },
+            {
+              "type": "row",
+              "totalWidth": 32,
+              "columns": [
+                { "text": "四列A", "weight": 2, "wrap": true },
+                { "text": "四列B", "weight": 1, "alignment": "center" },
+                { "text": "四列C", "weight": 1, "alignment": "center" },
+                { "text": "四列D", "weight": 1, "alignment": "right" }
+              ]
+            },
+            { "type": "qrcode", "content": "https://lineprinter.dev" },
+            { "type": "barcode", "content": "12345678", "barcodeType": "code128", "height": 60, "width": 2, "hri": "below" },
+            { "type": "image", "base64": "\(onePixelBase64)", "dither": "threshold", "threshold": 128 },
+            { "type": "blank" },
+            {
+              "type": "group",
+              "elements": [
+                { "type": "text", "content": "组合元素1" },
+                { "type": "text", "content": "组合元素2" }
+              ]
+            },
+            { "type": "spacing", "points": 24 },
+            { "type": "defaultSpacing" },
+            { "type": "beep", "times": 2, "duration": 3 },
+            { "type": "drawer" },
+            { "type": "blackMark" },
+            { "type": "feed", "lines": 2 },
+            { "type": "partialCut" }
           ]
         }
         """
@@ -402,7 +433,8 @@ class Tests: XCTestCase {
             let ticket = try Ticket(json: jsonString)
             XCTAssertTrue(ticket.autoCut)
             XCTAssertTrue(ticket.autoInitialize)
-            XCTAssertEqual(ticket.chunks.count, 4)
+            // 验证全部 18 个区块均被正确识别解析
+            XCTAssertEqual(ticket.chunks.count, 18)
             
             // 验证生成的二进制流是否包含对应的指令特征
             let data = ticket.bytes(using: .utf8)
@@ -416,8 +448,20 @@ class Tests: XCTestCase {
             XCTAssertTrue(bytes.contains(29))
             XCTAssertTrue(bytes.contains(86))
             
+            // 开钱箱指令 [27, 112]
+            XCTAssertTrue(bytes.contains(112))
+            
+            // 蜂鸣器指令 [27, 66]
+            XCTAssertTrue(bytes.contains(66))
+            
+            // 二维码存储指令 [29, 40, 107]
+            XCTAssertTrue(bytes.contains(107))
+            
+            // 条码指令 [29, 107]
+            XCTAssertTrue(bytes.contains(73)) // Code128 = 73
+            
         } catch {
-            XCTFail("JSON 解析失败: \(error)")
+            XCTFail("JSON 全元素解析失败: \(error)")
         }
     }
     

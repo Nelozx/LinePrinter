@@ -112,21 +112,46 @@ myPeripheral.writeValue(data, for: myCharacteristic, type: .withoutResponse)
 
 ---
 
-### Paradigm 2: Server-Driven Dynamic JSON Layout (Over-The-Air Update)
+### Paradigm 2: Server-Driven Dynamic JSON Layout (Full Element Coverage / OTA)
 
-Allow your cloud backend or microservices to dynamically push JSON templates directly to the iOS app:
+Allow your cloud backend or microservices to dynamically push JSON templates covering **all text styles, arbitrary multi-columns, dynamic Base64 images, barcodes/QRCodes, and all hardware commands**:
 
 ```swift
-// 1. Construct Ticket from server JSON string
+// 1. Construct Ticket from server JSON string (Full element coverage)
 let jsonString = """
 {
   "autoInitialize": true,
   "autoCut": true,
   "chunks": [
-    { "type": "text", "text": "Cloud Dynamic Receipt", "bold": true, "alignment": "center" },
-    { "type": "splitter" },
-    { "type": "twoColumn", "left": "Total Paid", "right": "$98.00" },
+    // Text (Bold, double size, underline, reverse)
+    { "type": "text", "content": "Large Centered Title", "bold": true, "alignment": "center", "size": "double" },
+    { "type": "text", "content": "White on Black Text", "alignment": "right", "reverse": true },
+    // Splitter line
+    { "type": "splitter", "char": "-", "printDensity": 384 },
+    // Multi-column alignment with custom weights and smart wrapping
+    {
+      "type": "row",
+      "totalWidth": 32,
+      "columns": [
+        { "text": "Grilled Salmon Special", "weight": 2, "wrap": true },
+        { "text": "x1", "weight": 1, "alignment": "center" },
+        { "text": "$38.00", "weight": 1, "alignment": "right" }
+      ]
+    },
+    // Convenient two-column shortcut
+    { "type": "twoColumn", "left": "Total Paid", "right": "$38.00" },
+    // Native dot-matrix QRCode and 1D Barcode (with height & HRI)
     { "type": "qrcode", "content": "https://lineprinter.dev" },
+    { "type": "barcode", "content": "20260908001", "barcodeType": "code128", "height": 60, "hri": "below" },
+    // Image (Remote Base64 or local asset name, Floyd-Steinberg or threshold dithering)
+    { "type": "image", "base64": "iVBORw0KGgo...", "dither": "floydSteinberg" },
+    // Blank spacer
+    { "type": "blank" },
+    // Hardware control commands
+    { "type": "spacing", "points": 24 },
+    { "type": "beep", "times": 2, "duration": 3 },
+    { "type": "drawer" },
+    { "type": "feed", "lines": 2 },
     { "type": "cut" }
   ]
 }
