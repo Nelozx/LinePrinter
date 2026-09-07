@@ -87,14 +87,14 @@ LinePrinter.ticket(
     .text("Quick Checkout Receipt", bold: true, alignment: .center),
     .splitter,
     .row(totalWidth: 32,
-         Line("Item", weight: 2, alignment: .left),
-         Line("Qty", weight: 1, alignment: .center),
-         Line("Price", weight: 1, alignment: .right)),
-    .splitter(char: "-"),
-    .threeColumn("Signature Sauerkraut Fish", "x1", "38.00", wrap: true),
-    .threeColumn("Iced Barley Grass Juice", "x2", "16.00", wrap: true),
+         Col("Item", weight: 2, alignment: .left),
+         Col("Qty", weight: 1, alignment: .center),
+         Col("Price", weight: 1, alignment: .right)),
+    .splitter("-"),
+    .row("Signature Sauerkraut Fish", "x1", "38.00", wrap: true),
+    .row("Iced Barley Grass Juice", "x2", "16.00", wrap: true),
     .splitter,
-    .twoColumn("Total Paid", "$54.00"),
+    .row("Total Paid", "$54.00"),
     .qrcode("https://weixin.qq.com/r/example_invoice"),
     .cut
 ).print(to: bluetoothTransport)
@@ -102,7 +102,7 @@ LinePrinter.ticket(
 // 2. Or retrieve raw ESC/POS continuous binary stream Data
 let data = LinePrinter.ticket(
     .text("Order: NO.20260907001"),
-    .twoColumn("Total Paid", "$20.00"),
+    .row("Total Paid", "$20.00"),
     .cut
 ).bytes(using: .gbk)
 
@@ -197,17 +197,19 @@ if status.contains(.offline) {
 | DSL Element | Description |
 |---|---|
 | `.text("Content", bold: true, alignment: .center)` | Styled text with auto-reset alignment, size, and weight |
-| `.splitter(char: "-")` | Responsive full-width horizontal separator line |
-| `.twoColumn("Left", "Right")` | Quick two-column aligned layout |
-| `.threeColumn("Name", "Qty", "Price", wrap: true)` | Three-column layout with optional auto-wrapping for long names |
-| `.row(totalWidth: 32, ...)` | Fully customizable multi-column layout with fixed widths or weights |
-| `.group(...)` | Vertical block container |
+| `.splitter("-")` | Responsive full-width horizontal separator line |
+| `.row("Item", "$10")` | Quick two-column aligned layout |
+| `.row("Name", "Qty", "Price", wrap: true)` | Three-column layout with optional auto-wrapping for long names |
+| `.row(totalWidth: 32, Col("Name", weight: 2), ...)` | Fully customizable multi-column layout with fixed widths or weights |
 | `.image(uiImage, dither: .floydSteinberg)` | Raster bitmap with thresholding or Floyd-Steinberg error diffusion |
 | `.qrcode("https://...")` | ESC/POS native hardware QR code |
-| `.barcode("123456", type: .code128)` | Standard 1D barcode (Code128, EAN13, etc.) |
-| `.openDrawer` | Sends cash drawer pulse |
+| `.barcode("123456", type: .code128)` | Standard 1D barcode (with HRI text) |
+| `.drawer` | Sends cash drawer pulse |
 | `.cut` / `.partialCut` / `.feedAndCut` | Full cut / Partial cut / Feed & Cut |
-| `.feed(lines: 3)` | Feed paper by specified number of lines |
+| `.feed(3)` | Feed paper by specified number of lines |
+| `.beep(2)` | Hardware buzzer / alert beeper |
+| `.spacing(22)` / `.defaultSpacing` | Set custom line spacing / restore default |
+| `.blackMark` | Feed paper to black mark / label seam |
 
 ---
 

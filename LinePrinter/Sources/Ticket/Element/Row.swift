@@ -55,7 +55,6 @@ public struct Col {
 
 /// 列别名
 public typealias Column = Col
-public typealias Line = Col
 
 /// 多列排版行组件（属于 Element 排版元素）
 ///

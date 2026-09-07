@@ -528,9 +528,6 @@ public extension Ticket {
     func preview(paperWidth: ReceiptPaperWidth = .mm58) -> ReceiptPreviewView {
         ReceiptPreviewView(ticket: self, paperWidth: paperWidth)
     }
-    func previewView(paperWidth: ReceiptPaperWidth = .mm58) -> ReceiptPreviewView {
-        preview(paperWidth: paperWidth)
-    }
     
     /// 将小票渲染并导出为一张高清晰度长图 `UIImage`
     func image(paperWidth: ReceiptPaperWidth = .mm58, scale: CGFloat = 2.0) -> UIImage? {
@@ -552,9 +549,6 @@ public extension Ticket {
         return renderer.image { ctx in
             view.layer.render(in: ctx.cgContext)
         }
-    }
-    func previewImage(paperWidth: ReceiptPaperWidth = .mm58, scale: CGFloat = 2.0) -> UIImage? {
-        image(paperWidth: paperWidth, scale: scale)
     }
 }
 #endif

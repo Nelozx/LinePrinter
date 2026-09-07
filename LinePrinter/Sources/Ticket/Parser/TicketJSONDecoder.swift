@@ -130,8 +130,8 @@ extension ChunkModel {
         case "partialCut":
             return .partialCut
             
-        case "openDrawer":
-            return .openDrawer
+        case "openDrawer", "drawer":
+            return .drawer
             
         case "feedAndCut":
             return .feedAndCut

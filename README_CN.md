@@ -87,14 +87,14 @@ LinePrinter.ticket(
     .text("快速结账单", bold: true, alignment: .center),
     .splitter,
     .row(totalWidth: 32,
-         Line("品名", weight: 2, alignment: .left),
-         Line("数量", weight: 1, alignment: .center),
-         Line("金额", weight: 1, alignment: .right)),
-    .splitter(char: "-"),
-    .threeColumn("招牌老坛酸菜鱼", "x1", "38.00", wrap: true),
-    .threeColumn("冰镇大麦若叶汁", "x2", "16.00", wrap: true),
+         Col("品名", weight: 2, alignment: .left),
+         Col("数量", weight: 1, alignment: .center),
+         Col("金额", weight: 1, alignment: .right)),
+    .splitter("-"),
+    .row("招牌老坛酸菜鱼", "x1", "38.00", wrap: true),
+    .row("冰镇大麦若叶汁", "x2", "16.00", wrap: true),
     .splitter,
-    .twoColumn("应收总计", "￥54.00"),
+    .row("应收总计", "￥54.00"),
     .qrcode("https://weixin.qq.com/r/example_invoice"),
     .cut
 ).print(to: bluetoothTransport)
@@ -102,7 +102,7 @@ LinePrinter.ticket(
 // 2. 亦可获取标准 ESC/POS 连续二进制字节流 Data 自行下发
 let data = LinePrinter.ticket(
     .text("单号：NO.20260907001"),
-    .twoColumn("实付金额", "￥20.00"),
+    .row("实付金额", "￥20.00"),
     .cut
 ).bytes(using: .gbk)
 
@@ -197,17 +197,19 @@ if status.contains(.offline) {
 | DSL 排版 API | 说明 |
 |---|---|
 | `.text("内容", bold: true, alignment: .center)` | 带样式的文本，支持居左/中/右对齐、加粗与样式自动复位 |
-| `.splitter(char: "-")` | 自适应行宽的分割线 |
-| `.twoColumn("原价", "￥50")` | 快速两列左右对齐 |
-| `.threeColumn("品名", "x1", "35.00", wrap: true)` | 快速三列对齐（支持超长菜品名自动换行） |
-| `.row(totalWidth: 32, ...)` | 自定义多列对齐（支持各列设置固定宽度或权重比例） |
-| `.group(...)` | 垂直块分组容器 |
+| `.splitter("-")` | 自适应行宽的分割线 |
+| `.row("原价", "￥50")` | 快速双列两端对齐 |
+| `.row("品名", "x1", "35.00", wrap: true)` | 快速三列对齐（支持超长菜品名自动折行） |
+| `.row(totalWidth: 32, Col("品名", weight: 2), ...)` | 自定义多列对齐（支持各列设置固定宽度或权重比例） |
 | `.image(uiImage, dither: .floydSteinberg)` | 打印位图，支持灰度阈值法与误差扩散抖动 |
-| `.qrcode("https://...")` | ESC/POS 原生二维码 |
-| `.barcode("123456", type: .code128)` | 一维条形码 |
-| `.openDrawer` | 弹出收银钱箱 |
+| `.qrcode("https://...")` | ESC/POS 硬件原生二维码 |
+| `.barcode("123456", type: .code128)` | 一维条形码（支持下方 HRI 数字） |
+| `.drawer` | 弹出收银钱箱 |
 | `.cut` / `.partialCut` / `.feedAndCut` | 全切纸 / 半切纸 / 进纸切纸 |
-| `.feed(lines: 3)` | 走纸指定行数 |
+| `.feed(3)` | 走纸指定行数 |
+| `.beep(2)` | 蜂鸣器发声提醒 |
+| `.spacing(22)` / `.defaultSpacing` | 自定义行间距 / 恢复默认行距 |
+| `.blackMark` | 进纸定位至黑标/标签切口 |
 
 ---
 

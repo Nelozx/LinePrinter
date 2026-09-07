@@ -208,16 +208,6 @@ public extension Chunk {
                   Col(col3, weight: 1, alignment: .right)))
     }
 
-    /// 双列排版（别名支持）
-    static func twoColumn(_ left: String, _ right: String, totalWidth: Int = 32, wrap: Bool = false) -> Self {
-        row(left, right, totalWidth: totalWidth, wrap: wrap)
-    }
-    
-    /// 三列排版（别名支持）
-    static func threeColumn(_ col1: String, _ col2: String, _ col3: String, totalWidth: Int = 32, wrap: Bool = false) -> Self {
-        row(col1, col2, col3, totalWidth: totalWidth, wrap: wrap)
-    }
-    
     /// 垂直块分组容器
     static func group(_ elements: Chunk...) -> Self {
         Chunk(ChunkGroup(elements))
@@ -234,7 +224,6 @@ public extension Chunk {
     
     /// 弹出收银钱箱
     static var drawer: Self { Chunk(Data.drawer, feedPoints: 0) }
-    static var openDrawer: Self { drawer }
     
     /// 走纸指定行数
     static func feed(_ lines: UInt8 = 1) -> Self {
@@ -243,23 +232,17 @@ public extension Chunk {
     
     /// 蜂鸣器发声提示块（后厨催单、出单提醒）
     static func beep(_ times: UInt8 = 1, duration: UInt8 = 2) -> Self {
-        Chunk(Data.buzzer(times: times, duration: duration), feedPoints: 0)
-    }
-    static func buzzer(_ times: UInt8 = 1, duration: UInt8 = 2) -> Self {
-        beep(times, duration: duration)
+        Chunk(Data.beep(times: times, duration: duration), feedPoints: 0)
     }
     
     /// 设置自定义行间距（点阵数）
     static func spacing(_ points: UInt8) -> Self {
         Chunk(Data.spacing(points), feedPoints: 0)
     }
-    static func lineSpacing(_ points: UInt8) -> Self { spacing(points) }
     
     /// 恢复出厂默认行间距
     static var defaultSpacing: Self { Chunk(Data.defaultSpacing, feedPoints: 0) }
-    static var defaultLineSpacing: Self { defaultSpacing }
     
     /// 进纸定位至黑标/标签缝隙
     static var blackMark: Self { Chunk(Data.blackMark, feedPoints: 0) }
-    static var feedToBlackMark: Self { blackMark }
 }

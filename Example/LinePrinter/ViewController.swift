@@ -208,8 +208,8 @@ class ViewController: UIViewController {
         modalScroll.alwaysBounceVertical = true
         modalVC.view.addSubview(modalScroll)
         
-        // 主项目调用者直接获取纯净的 previewView 嵌入自己的任何容器中
-        let preview = ticket.previewView(paperWidth: width)
+        // 主项目调用者直接获取纯净的 preview 嵌入自己的任何容器中
+        let preview = ticket.preview(paperWidth: width)
         preview.translatesAutoresizingMaskIntoConstraints = false
         modalScroll.addSubview(preview)
         

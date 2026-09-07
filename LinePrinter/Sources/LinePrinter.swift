@@ -16,7 +16,7 @@ import AppKit
 #endif
 /// `LinePrinter` 核心统一入口与门面命名空间
 ///
-/// 提供了快速构建小票（`ticket`）、一行代码直出二进制流（`bytes`）以及硬件状态解析（`parseStatus`）的能力。
+/// 提供了快速构建小票（`ticket`）、一行代码直出二进制流（`bytes`）以及硬件状态解析（`status`）的能力。
 ///
 /// ```swift
 /// import LinePrinter
@@ -25,10 +25,10 @@ import AppKit
 /// let ticket = LinePrinter.ticket(
 ///     .text("餐饮结账单", bold: true, alignment: .center),
 ///     .splitter,
-///     .threeColumn("老坛酸菜鱼", "x1", "38.00", wrap: true),
-///     .twoColumn("实付金额", "￥38.00"),
+///     .row("老坛酸菜鱼", "x1", "38.00", wrap: true),
+///     .row("实付金额", "￥38.00"),
 ///     .qrcode("https://weixin.qq.com/..."),
-///     .feed(lines: 3)
+///     .feed(3)
 /// )
 ///
 /// // 2. 获取 ESC/POS 二进制字节流
@@ -62,15 +62,11 @@ public enum LinePrinter {
     public static func status(_ byte: UInt8) -> PrinterHardwareStatus {
         PrinterHardwareStatus.parse(byte: byte)
     }
-    public static func parseStatus(byte: UInt8) -> PrinterHardwareStatus { status(byte) }
     
     #if canImport(UIKit)
     /// 将 `UIImage` 转换为 ESC/POS 光栅位图数据
     public static func rasterData(from image: UIImage, dither: ImageDitherStyle = .floydSteinberg) -> Data? {
         image.rasterEscPosData(dither: dither)
-    }
-    public static func imageRasterData(from image: UIImage, dither: ImageDitherStyle = .floydSteinberg) -> Data? {
-        rasterData(from: image, dither: dither)
     }
     #endif
 
@@ -79,16 +75,10 @@ public enum LinePrinter {
     public static func rasterData(from image: NSImage, dither: ImageDitherStyle = .floydSteinberg) -> Data? {
         image.rasterEscPosData(dither: dither)
     }
-    public static func imageRasterData(from image: NSImage, dither: ImageDitherStyle = .floydSteinberg) -> Data? {
-        rasterData(from: image, dither: dither)
-    }
     #endif
 
     /// 将 `CGImage` 转换为 ESC/POS 光栅位图数据
     public static func rasterData(from cgImage: CGImage, dither: ImageDitherStyle = .floydSteinberg) -> Data? {
         cgImage.rasterEscPosData(dither: dither)
-    }
-    public static func imageRasterData(from cgImage: CGImage, dither: ImageDitherStyle = .floydSteinberg) -> Data? {
-        rasterData(from: cgImage, dither: dither)
     }
 }

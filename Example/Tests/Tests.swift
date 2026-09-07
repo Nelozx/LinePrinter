@@ -111,10 +111,10 @@ class Tests: XCTestCase {
             chunks: [
                 .text("餐饮结账单", bold: true, alignment: .center),
                 .splitter,
-                .twoColumn("牛肉面", "￥35.00"),
-                .twoColumn("冰红茶", "￥5.00"),
+                .row("牛肉面", "￥35.00"),
+                .row("冰红茶", "￥5.00"),
                 .splitter,
-                .twoColumn("合计", "￥40.00"),
+                .row("合计", "￥40.00"),
                 .feed(3)
             ],
             autoInitialize: true,
@@ -148,12 +148,12 @@ class Tests: XCTestCase {
         UIGraphicsEndImageContext()
         
         // 1. 阈值模式
-        let thresholdData = LinePrinter.imageRasterData(from: testImage, dither: .threshold(128))
+        let thresholdData = LinePrinter.rasterData(from: testImage, dither: .threshold(128))
         XCTAssertNotNil(thresholdData)
         XCTAssertGreaterThan(thresholdData?.count ?? 0, 0)
         
         // 2. Floyd-Steinberg 抖动模式
-        let ditherData = LinePrinter.imageRasterData(from: testImage, dither: .floydSteinberg)
+        let ditherData = LinePrinter.rasterData(from: testImage, dither: .floydSteinberg)
         XCTAssertNotNil(ditherData)
         XCTAssertGreaterThan(ditherData?.count ?? 0, 0)
     }
@@ -184,9 +184,9 @@ class Tests: XCTestCase {
         let longName = "老坛酸菜无骨鱼饭超大份双拼" // 26 显示宽度
         let line = Row(
             totalWidth: 32,
-            Line(longName, weight: 2, alignment: .left, wrap: true),
-            Line("x1", weight: 1, alignment: .center),
-            Line("38.00", weight: 1, alignment: .right)
+            Col(longName, weight: 2, alignment: .left, wrap: true),
+            Col("x1", weight: 1, alignment: .center),
+            Col("38.00", weight: 1, alignment: .right)
         )
         let data = line.data(using: .utf8)
         let output = String(data: data, encoding: .utf8)!
@@ -208,7 +208,7 @@ class Tests: XCTestCase {
         let ticket = Ticket(
             chunks: [
                 .text("外卖结算单", bold: true, alignment: .center),
-                .twoColumn("商品小计", "￥58.00")
+                .row("商品小计", "￥58.00")
             ],
             autoInitialize: true,
             autoCut: true
@@ -233,7 +233,7 @@ class Tests: XCTestCase {
         mock.receivedData = Data()
         LinePrinter.ticket(
             .text("快速结账单", bold: true, alignment: .center),
-            .twoColumn("应收", "￥20.00"),
+            .row("应收", "￥20.00"),
             .cut
         ).print(to: mock)
         XCTAssertFalse(mock.receivedData.isEmpty)
@@ -276,8 +276,8 @@ class Tests: XCTestCase {
         let directBytes = LinePrinter.bytes(chunks: [.text("直出字节流测试")])
         XCTAssertFalse(directBytes.isEmpty)
         
-        // 6. LinePrinter.parseStatus 快捷解析
-        let parsed = LinePrinter.parseStatus(byte: 0x60)
+        // 6. LinePrinter.status 快捷解析
+        let parsed = LinePrinter.status(0x60)
         XCTAssertTrue(parsed.contains(.paperEmpty))
     }
     
@@ -431,15 +431,15 @@ class Tests: XCTestCase {
             .text("时间: 2026-09-07 12:30:00"),
             .text("收银员: 01号"),
             .splitter,
-            .threeColumn("品名", "数量", "金额"),
+            .row("品名", "数量", "金额"),
             .splitter("-"),
-            .threeColumn("招牌老坛酸菜黑鱼饭(大份)", "x1", "38.00", wrap: true),
-            .threeColumn("秘制香辣鸭头", "x2", "16.00"),
-            .threeColumn("冰镇大麦若叶汁", "x1", "8.00"),
+            .row("招牌老坛酸菜黑鱼饭(大份)", "x1", "38.00", wrap: true),
+            .row("秘制香辣鸭头", "x2", "16.00"),
+            .row("冰镇大麦若叶汁", "x1", "8.00"),
             .splitter,
-            .twoColumn("原价合计", "￥62.00"),
-            .twoColumn("会员优惠券", "-￥12.00"),
-            .twoColumn("实付金额", "￥50.00"),
+            .row("原价合计", "￥62.00"),
+            .row("会员优惠券", "-￥12.00"),
+            .row("实付金额", "￥50.00"),
             .splitter,
             .text("支付方式: 微信支付"),
             .text("【取餐号: A088】", bold: true, alignment: .center),
@@ -484,7 +484,7 @@ class Tests: XCTestCase {
         
         let ticket = LinePrinter.ticket(
             .text("快速结账单", bold: true, alignment: .center),
-            .twoColumn("应收", "￥20.00"),
+            .row("应收", "￥20.00"),
             .cut
         ).print(to: mock)
         
