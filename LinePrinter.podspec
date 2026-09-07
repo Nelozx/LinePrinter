@@ -10,7 +10,7 @@ and zero-dependency network (TCP) and Bluetooth (BLE) printing.
 
   s.homepage         = 'https://github.com/Nelozx/LinePrinter'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'Nelozx' => 'nelozx@163.com' }
+  s.author           = { 'Nelo' => 'nelozx@163.com' }
   s.source           = { :git => 'https://github.com/Nelozx/LinePrinter.git', :tag => s.version.to_s }
   s.swift_versions   = ['5.0', '5.5']
 
