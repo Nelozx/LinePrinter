@@ -187,10 +187,40 @@ public extension Chunk {
     }
     #endif
 
+    /// 打印本地资源图片（Asset Catalog 或 Bundle）
+    static func image(named name: String?, bundle: Bundle? = nil, dither: ImageDitherStyle = .floydSteinberg) -> Self {
+        guard let name = name else { return .empty }
+        return Chunk(Image(named: name, bundle: bundle, dither: dither))
+    }
+
     /// 打印位图（CoreGraphics CGImage）
     static func image(cgImage: CGImage?, dither: ImageDitherStyle = .floydSteinberg) -> Self {
         guard let cgImage = cgImage else { return .empty }
         return Chunk(Image(cgImage: cgImage, dither: dither))
+    }
+    
+    /// 打印 Base64 编码位图（服务端动态下发图片）
+    static func image(base64: String?, dither: ImageDitherStyle = .floydSteinberg) -> Self {
+        guard let base64 = base64 else { return .empty }
+        return Chunk(Image(base64: base64, dither: dither))
+    }
+    
+    /// 打印远程网络图片（URL 地址，内置内存缓存）
+    static func image(url: URL?, dither: ImageDitherStyle = .floydSteinberg, timeout: TimeInterval = 5.0) -> Self {
+        guard let url = url else { return .empty }
+        return Chunk(Image(url: url, dither: dither, timeout: timeout))
+    }
+    
+    /// 打印远程网络图片（URL 字符串，内置内存缓存）
+    static func image(url: String?, dither: ImageDitherStyle = .floydSteinberg, timeout: TimeInterval = 5.0) -> Self {
+        guard let url = url, let validURL = URL(string: url) else { return .empty }
+        return Chunk(Image(url: validURL, dither: dither, timeout: timeout))
+    }
+    
+    /// 打印二进制文件原始位图（Data 数据）
+    static func image(data: Data?, dither: ImageDitherStyle = .floydSteinberg) -> Self {
+        guard let data = data else { return .empty }
+        return Chunk(Image(data: data, dither: dither))
     }
     
     /// 多列自定义排版行

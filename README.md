@@ -84,6 +84,7 @@ import LinePrinter
 
 // 1. Variadic Chaining Direct Dispatch (Build & send directly to Bluetooth / Network / POS)
 LinePrinter.ticket(
+    .image(url: "https://example.com/logo.png"), // Remote URL (auto-cached) or .image(base64: "...")
     .text("Quick Checkout Receipt", bold: true, alignment: .center),
     .splitter,
     .row(totalWidth: 32,
@@ -143,8 +144,9 @@ let jsonString = """
     // Native dot-matrix QRCode and 1D Barcode (with height & HRI)
     { "type": "qrcode", "content": "https://lineprinter.dev" },
     { "type": "barcode", "content": "20260908001", "barcodeType": "code128", "height": 60, "hri": "below" },
-    // Image (Remote Base64 or local asset name, Floyd-Steinberg or threshold dithering)
-    { "type": "image", "base64": "iVBORw0KGgo...", "dither": "floydSteinberg" },
+    // Image (Remote URL, Remote Base64, or local asset name; with Floyd-Steinberg or threshold dithering)
+    { "type": "image", "url": "https://example.com/logo.png", "dither": "floydSteinberg" },
+    { "type": "image", "base64": "iVBORw0KGgo...", "dither": "threshold", "threshold": 128 },
     // Blank spacer
     { "type": "blank" },
     // Hardware control commands

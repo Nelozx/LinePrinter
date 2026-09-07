@@ -615,6 +615,72 @@ class Tests: XCTestCase {
             XCTFail("私有 JSON 映射失败: \(error)")
         }
     }
+    
+    // MARK: - 远程图片支持测试 (Base64 与 URL)
+    func testRemoteImageBase64AndURL() {
+        // 创建一个简单的 16x16 测试位图 PNG Data
+        let size = CGSize(width: 16, height: 16)
+        UIGraphicsBeginImageContextWithOptions(size, true, 1.0)
+        UIColor.black.setFill()
+        UIRectFill(CGRect(origin: .zero, size: size))
+        let sampleImage = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+        
+        guard let pngData = UIImagePNGRepresentation(sampleImage) else {
+            XCTFail("生成测试图片 Data 失败")
+            return
+        }
+        let rawBase64 = pngData.base64EncodedString()
+        let dataUriBase64 = "data:image/png;base64," + rawBase64
+        
+        // 1. 测试 Chunk.image(base64:) 原生 base64 及带 data:image 前缀
+        let chunkRawB64 = Chunk.image(base64: rawBase64, dither: .threshold(128))
+        let dataRawB64 = chunkRawB64.data(using: .utf8)
+        XCTAssertFalse(dataRawB64.isEmpty, "Base64 图片生成打印数据不应为空")
+        
+        let chunkUriB64 = Chunk.image(base64: dataUriBase64, dither: .threshold(128))
+        let dataUriB64 = chunkUriB64.data(using: .utf8)
+        XCTAssertFalse(dataUriB64.isEmpty, "DataURI 前缀 Base64 图片生成打印数据不应为空")
+        
+        // 2. 测试 Chunk.image(url:) 本地 file URL 模拟网络 URL
+        let tempFileURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("test_remote_img.png")
+        try? pngData.write(to: tempFileURL)
+        defer { try? FileManager.default.removeItem(at: tempFileURL) }
+        
+        let chunkURL = Chunk.image(url: tempFileURL)
+        let dataURL = chunkURL.data(using: .utf8)
+        XCTAssertFalse(dataURL.isEmpty, "URL 图片生成打印数据不应为空")
+        
+        // 3. 测试 JSON 反序列化对 base64 和 url 两种远程图片字段的全元素支持
+        let jsonWithRemoteImages = """
+        {
+          "autoInitialize": true,
+          "autoCut": true,
+          "chunks": [
+            {
+              "type": "image",
+              "base64": "\(rawBase64)",
+              "dither": "threshold",
+              "threshold": 128
+            },
+            {
+              "type": "image",
+              "url": "\(tempFileURL.absoluteString)",
+              "dither": "floydSteinberg"
+            }
+          ]
+        }
+        """
+        
+        do {
+            let ticket = try Ticket(json: jsonWithRemoteImages)
+            XCTAssertEqual(ticket.chunks.count, 2, "应该成功解析 2 个远程图片区块")
+            let fullBytes = ticket.bytes()
+            XCTAssertFalse(fullBytes.isEmpty, "解析后的远程图片小票输出字节流不应为空")
+        } catch {
+            XCTFail("远程图片 JSON 解析失败: \(error)")
+        }
+    }
 }
 
 
