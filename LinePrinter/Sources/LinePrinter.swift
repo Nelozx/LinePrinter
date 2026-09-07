@@ -62,6 +62,32 @@ public enum LinePrinter {
         Ticket(chunks: chunks, autoInitialize: autoInitialize, autoCut: autoCut)
     }
     
+    /// 便捷声明式构建小票对象（SwiftUI 风格 Result Builder）
+    ///
+    /// - Parameters:
+    ///   - autoInitialize: 是否在头部自动初始化（`ESC @`），默认为 `true`
+    ///   - autoCut: 是否在末尾自动切纸，默认为 `false`
+    ///   - builder: 声明式排版闭包，无需中括号和逗号，原生支持 if / for 语法
+    /// - Returns: 构建完成的 `Ticket` 小票对象
+    ///
+    /// ```swift
+    /// let ticket = LinePrinter.ticket(autoCut: true) {
+    ///     Chunk.text("味美餐饮店", bold: true, alignment: .center)
+    ///     Chunk.splitter
+    ///     for item in items {
+    ///         Chunk.threeColumn(item.name, item.qty, item.price)
+    ///     }
+    ///     Chunk.qrcode("https://...")
+    /// }
+    /// ```
+    public static func ticket(
+        autoInitialize: Bool = true,
+        autoCut: Bool = false,
+        @TicketBuilder _ builder: () -> [Chunk]
+    ) -> Ticket {
+        Ticket(autoInitialize: autoInitialize, autoCut: autoCut, builder: builder)
+    }
+    
     /// 便捷构建小票对象（数组参数 DSL）
     ///
     /// - Parameters:

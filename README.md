@@ -73,53 +73,59 @@ pod 'LinePrinter', :git => 'https://github.com/Nelozx/LinePrinter.git'
 
 ## 🚀 Quick Start
 
-### 1. Build a Receipt Declaratively
+### 1. Build a Receipt Declaratively (SwiftUI-Style Result Builder)
 
 ```swift
 import LinePrinter
 
-let ticket = Ticket(
-    chunks: [
-        // 1. Header (Bold & Centered)
-        .text("Gourmet Restaurant Flagship", bold: true, alignment: .center),
-        .text("-- Welcome --", attributes: [TextAttribute.alignment(.center)]),
-        .splitter,
-        
-        // 2. Order Metadata
-        .text("Order No: NO.20260907001"),
-        .text("Time: 2026-09-07 12:30:00"),
-        .splitter,
-        
-        // 3. Multi-Column Header (Item: weight 2, Qty: weight 1, Price: weight 1)
-        .row(totalWidth: 32,
-             LineColumn("Item", weight: 2, alignment: .left),
-             LineColumn("Qty", weight: 1, alignment: .center),
-             LineColumn("Amount", weight: 1, alignment: .right)),
-        .splitter(char: "-"),
-        
-        // 4. Line Items (Supports smart text wrapping with wrap: true)
-        .threeColumn("Signature Pickled Fish Rice Bowl (Large)", "x1", "38.00", wrap: true),
-        .threeColumn("Braised Spiced Egg", "x2", "6.00"),
-        .threeColumn("Iced Soda Drink", "x1", "5.00"),
-        .splitter,
-        
-        // 5. Total & Discounts
-        .twoColumn("Subtotal", "$49.00"),
-        .twoColumn("VIP Discount", "-$9.00"),
-        .twoColumn("Total Paid", "$40.00"),
-        .splitter,
-        
-        // 6. QR Code & Barcode
-        .text("Scan for e-Invoice", attributes: [TextAttribute.alignment(.center)]),
-        .qrcode("https://weixin.qq.com/r/example_invoice"),
-        .barcode("20260907001", type: .code128),
-        
-        // 7. Footer & Paper Feed
-        .text("Thank you for your visit!", attributes: [TextAttribute.alignment(.center)]),
-        .feed(lines: 4)
-    ],
-    autoInitialize: true,  // Automatically sends ESC @ at the beginning
-    autoCut: true         // Automatically feeds and cuts paper at the end
+let ticket = Ticket(autoCut: true) {
+    // 1. Header (Bold & Centered)
+    Chunk.text("Gourmet Restaurant Flagship", bold: true, alignment: .center)
+    Chunk.text("-- Welcome --", attributes: [TextAttribute.alignment(.center)])
+    Chunk.splitter
+    
+    // 2. Order Metadata
+    Chunk.text("Order No: NO.20260907001")
+    Chunk.text("Time: 2026-09-07 12:30:00")
+    Chunk.splitter
+    
+    // 3. Multi-Column Header
+    Chunk.row(totalWidth: 32,
+              LineColumn("Item", weight: 2, alignment: .left),
+              LineColumn("Qty", weight: 1, alignment: .center),
+              LineColumn("Amount", weight: 1, alignment: .right))
+    Chunk.splitter(char: "-")
+    
+    // 4. Line Items (Native for-in loops and auto-wrapping)
+    for item in orderItems {
+        Chunk.threeColumn(item.name, "x\(item.qty)", item.price, wrap: true)
+    }
+    Chunk.splitter
+    
+    // 5. Total & Discounts (Native if-condition support)
+    Chunk.twoColumn("Subtotal", "$49.00")
+    if hasCoupon {
+        Chunk.twoColumn("VIP Discount", "-$9.00")
+    }
+    Chunk.twoColumn("Total Paid", "$40.00")
+    Chunk.splitter
+    
+    // 6. QR Code & Barcode
+    Chunk.text("Scan for e-Invoice", attributes: [TextAttribute.alignment(.center)])
+    Chunk.qrcode("https://weixin.qq.com/r/example_invoice")
+    Chunk.barcode("20260907001", type: .code128)
+    
+    // 7. Footer & Paper Feed
+    Chunk.text("Thank you for your visit!", attributes: [TextAttribute.alignment(.center)])
+    Chunk.feed(lines: 4)
+}
+
+// Alternatively, use lightweight variadic parameters (no brackets):
+let quickTicket = LinePrinter.ticket(
+    .text("Quick Checkout", bold: true, alignment: .center),
+    .splitter,
+    .twoColumn("Total", "$25.00"),
+    .qrcode("https://...")
 )
 ```
 

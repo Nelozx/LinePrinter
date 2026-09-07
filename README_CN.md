@@ -73,53 +73,59 @@ pod 'LinePrinter', :git => 'https://github.com/Nelozx/LinePrinter.git'
 
 ## 🚀 快速上手
 
-### 1. 声明式构建一张小票
+### 1. 声明式构建一张小票 (SwiftUI 风格 Result Builder)
 
 ```swift
 import LinePrinter
 
-let ticket = Ticket(
-    chunks: [
-        // 1. 店铺标题 (加粗居中)
-        .text("味美餐饮旗舰店", bold: true, alignment: .center),
-        .text("-- 欢迎光临 --", attributes: [TextAttribute.alignment(.center)]),
-        .splitter,
-        
-        // 2. 基础单号信息
-        .text("单号：NO.20260907001"),
-        .text("时间：2026-09-07 12:30:00"),
-        .splitter,
-        
-        // 3. 多列表头 (品名 2 权重、数量 1 权重、金额 1 权重)
-        .row(totalWidth: 32,
-             LineColumn("品名", weight: 2, alignment: .left),
-             LineColumn("数量", weight: 1, alignment: .center),
-             LineColumn("金额", weight: 1, alignment: .right)),
-        .splitter(char: "-"),
-        
-        // 4. 明细 (支持超长菜名智能折行 wrap: true)
-        .threeColumn("招牌老坛酸菜无骨黑鱼饭(超大份)", "x1", "38.00", wrap: true),
-        .threeColumn("秘制卤蛋", "x2", "6.00"),
-        .threeColumn("冰镇可乐", "x1", "5.00"),
-        .splitter,
-        
-        // 5. 汇总金额 (两端对齐)
-        .twoColumn("原价合计", "￥49.00"),
-        .twoColumn("会员优惠", "-￥9.00"),
-        .twoColumn("实付金额", "￥40.00"),
-        .splitter,
-        
-        // 6. 二维码与条形码
-        .text("扫码开具电子发票", attributes: [TextAttribute.alignment(.center)]),
-        .qrcode("https://weixin.qq.com/r/example_invoice"),
-        .barcode("20260907001", type: .code128),
-        
-        // 7. 尾部提示与走纸
-        .text("多谢惠顾，欢迎再次光临！", attributes: [TextAttribute.alignment(.center)]),
-        .feed(lines: 4)
-    ],
-    autoInitialize: true,  // 自动在头部执行 ESC @ 初始化
-    autoCut: true         // 自动在小票结尾走纸并切纸
+let ticket = Ticket(autoCut: true) {
+    // 1. 店铺标题 (加粗居中)
+    Chunk.text("味美餐饮旗舰店", bold: true, alignment: .center)
+    Chunk.text("-- 欢迎光临 --", attributes: [TextAttribute.alignment(.center)])
+    Chunk.splitter
+    
+    // 2. 基础单号信息
+    Chunk.text("单号：NO.20260907001")
+    Chunk.text("时间：2026-09-07 12:30:00")
+    Chunk.splitter
+    
+    // 3. 多列表头 (品名 2 权重、数量 1 权重、金额 1 权重)
+    Chunk.row(totalWidth: 32,
+              LineColumn("品名", weight: 2, alignment: .left),
+              LineColumn("数量", weight: 1, alignment: .center),
+              LineColumn("金额", weight: 1, alignment: .right))
+    Chunk.splitter(char: "-")
+    
+    // 4. 明细 (原生支持 for-in 循环，支持超长菜名智能折行 wrap: true)
+    for item in orderItems {
+        Chunk.threeColumn(item.name, "x\(item.quantity)", item.price, wrap: true)
+    }
+    Chunk.splitter
+    
+    // 5. 汇总金额 (原生支持 if 条件控制)
+    Chunk.twoColumn("原价合计", "￥49.00")
+    if hasCoupon {
+        Chunk.twoColumn("会员优惠", "-￥9.00")
+    }
+    Chunk.twoColumn("实付金额", "￥40.00")
+    Chunk.splitter
+    
+    // 6. 二维码与条形码
+    Chunk.text("扫码开具电子发票", attributes: [TextAttribute.alignment(.center)])
+    Chunk.qrcode("https://weixin.qq.com/r/example_invoice")
+    Chunk.barcode("20260907001", type: .code128)
+    
+    // 7. 尾部提示与走纸
+    Chunk.text("多谢惠顾，欢迎再次光临！", attributes: [TextAttribute.alignment(.center)])
+    Chunk.feed(lines: 4)
+}
+
+// 亦可使用超简变长参数形式（无中括号，逗号隔开）：
+let quickTicket = LinePrinter.ticket(
+    .text("快速收银单", bold: true, alignment: .center),
+    .splitter,
+    .twoColumn("实付金额", "￥25.00"),
+    .qrcode("https://...")
 )
 ```
 

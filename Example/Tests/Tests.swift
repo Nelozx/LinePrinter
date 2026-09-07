@@ -474,5 +474,35 @@ class Tests: XCTestCase {
         XCTAssertGreaterThan(img80?.size.width ?? 0, 0)
         XCTAssertGreaterThan(img80?.size.height ?? 0, 0)
     }
+    
+    // MARK: - ResultBuilder 优雅声明式 DSL 测试
+    func testTicketResultBuilder() {
+        let hasCoupon = true
+        let items = [("招牌酸菜鱼", "x1", "38.00"), ("冰镇可乐", "x2", "6.00")]
+        
+        let ticket = Ticket(autoCut: true) {
+            Chunk.text("美味餐厅", bold: true, alignment: .center)
+            Chunk.splitter
+            
+            for item in items {
+                Chunk.threeColumn(item.0, item.1, item.2, wrap: true)
+            }
+            
+            if hasCoupon {
+                Chunk.twoColumn("优惠券抵扣", "-￥10.00")
+            }
+            
+            Chunk.splitter
+            Chunk.twoColumn("实付总计", "￥34.00")
+            Chunk.qrcode("https://weixin.qq.com")
+        }
+        
+        XCTAssertTrue(ticket.autoCut)
+        // 验证块数量: 1(text) + 1(splitter) + 2(items) + 1(coupon) + 1(splitter) + 1(total) + 1(qr) = 8
+        XCTAssertEqual(ticket.chunks.count, 8)
+        
+        let data = ticket.bytes(using: .utf8)
+        XCTAssertFalse(data.isEmpty)
+    }
 }
 
