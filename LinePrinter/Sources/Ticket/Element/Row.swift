@@ -166,14 +166,26 @@ public struct Row: Printable {
         }
         
         if !flexibleIndices.isEmpty && remainingWidth > 0 && totalWeight > 0 {
-            var allocated = 0
-            for (idx, flexIdx) in flexibleIndices.enumerated() {
-                if idx == flexibleIndices.count - 1 {
-                    widths[flexIdx] = max(1, remainingWidth - allocated)
-                } else {
-                    let w = max(1, (remainingWidth * columns[flexIdx].weight) / totalWeight)
-                    widths[flexIdx] = w
-                    allocated += w
+            let allWeightsEqual = flexibleIndices.allSatisfy { columns[$0].weight == columns[flexibleIndices[0]].weight }
+            let totalNeeded = flexibleIndices.reduce(0) { $0 + columns[$1].text.printDisplayWidth }
+            
+            // 智能优化：如果是两列等权重（如经典的左右对齐），且总字符需求未超纸宽，右列紧凑占用自身所需宽度，剩余全部空间留给左列长文本
+            if flexibleIndices.count == 2 && allWeightsEqual && totalNeeded <= remainingWidth {
+                let leftIdx = flexibleIndices[0]
+                let rightIdx = flexibleIndices[1]
+                let rightNeed = max(1, columns[rightIdx].text.printDisplayWidth)
+                widths[rightIdx] = rightNeed
+                widths[leftIdx] = max(1, remainingWidth - rightNeed)
+            } else {
+                var allocated = 0
+                for (idx, flexIdx) in flexibleIndices.enumerated() {
+                    if idx == flexibleIndices.count - 1 {
+                        widths[flexIdx] = max(1, remainingWidth - allocated)
+                    } else {
+                        let w = max(1, (remainingWidth * columns[flexIdx].weight) / totalWeight)
+                        widths[flexIdx] = w
+                        allocated += w
+                    }
                 }
             }
         }

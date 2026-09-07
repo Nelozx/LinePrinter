@@ -266,42 +266,52 @@ public class ReceiptPreviewView: UIView {
     private func makeMultiColumnView(from row: Row) -> UIView {
         let rowStack = UIStackView()
         rowStack.axis = .horizontal
-        rowStack.spacing = 6
+        rowStack.spacing = 4
         rowStack.distribution = .fill
         rowStack.alignment = .top
         rowStack.translatesAutoresizingMaskIntoConstraints = false
         
-        for col in row.columns {
+        let cols = row.columns
+        let isTwoCols = cols.count == 2
+        let allWeightsEqual = cols.allSatisfy { $0.weight == cols.first?.weight }
+        
+        for (idx, col) in cols.enumerated() {
             let label = UILabel()
             label.text = col.text
             label.textColor = UIColor(white: 0.15, alpha: 1.0)
-            label.font = ReceiptPreviewView.monospacedFont(ofSize: 12.5, weight: .regular)
+            label.font = ReceiptPreviewView.monospacedFont(ofSize: 12.0, weight: .regular)
             label.numberOfLines = col.isWrapEnabled ? 0 : 1
             label.textAlignment = col.alignment.nsTextAlignment
-            
-            // 权重与布局约束
             label.translatesAutoresizingMaskIntoConstraints = false
-            label.setContentHuggingPriority(.defaultLow, for: .horizontal)
-            label.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+            
+            if isTwoCols && allWeightsEqual {
+                // 核心优化：双列（左单号/品名，右工号/金额）等权重时，右列紧凑包裹自身宽度并靠右，左列撑满剩余所有空间，彻底杜绝省略号截断
+                if idx == 0 {
+                    label.setContentHuggingPriority(.defaultLow, for: .horizontal)
+                    label.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+                } else {
+                    label.setContentHuggingPriority(.required, for: .horizontal)
+                    label.setContentCompressionResistancePriority(.required, for: .horizontal)
+                }
+            } else {
+                label.setContentHuggingPriority(.defaultLow, for: .horizontal)
+                label.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+            }
             
             rowStack.addArrangedSubview(label)
-            
-            // 设置权重比例
-            if row.columns.count > 1 {
-                label.tag = col.weight
-            }
         }
         
-        // 动态配置等比例宽度
-        let totalWeight = CGFloat(row.columns.reduce(0) { $0 + $1.weight })
-        if totalWeight > 0 {
-            for (idx, subview) in rowStack.arrangedSubviews.enumerated() {
-                let colWeight = CGFloat(row.columns[idx].weight)
-                let multiplier = colWeight / totalWeight
-                // 约束各列宽度
-                let widthConstraint = subview.widthAnchor.constraint(equalTo: rowStack.widthAnchor, multiplier: multiplier, constant: -6)
-                widthConstraint.priority = .defaultHigh
-                widthConstraint.isActive = true
+        // 仅当多列（>2列）或两列显式设置了不同权重比例时，使用严格的比例约束
+        if !(isTwoCols && allWeightsEqual) {
+            let totalWeight = CGFloat(cols.reduce(0) { $0 + $1.weight })
+            if totalWeight > 0 {
+                for (idx, subview) in rowStack.arrangedSubviews.enumerated() {
+                    let colWeight = CGFloat(cols[idx].weight)
+                    let multiplier = colWeight / totalWeight
+                    let widthConstraint = subview.widthAnchor.constraint(equalTo: rowStack.widthAnchor, multiplier: multiplier, constant: -4)
+                    widthConstraint.priority = .defaultHigh
+                    widthConstraint.isActive = true
+                }
             }
         }
         
