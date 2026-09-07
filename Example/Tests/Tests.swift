@@ -416,8 +416,8 @@ class Tests: XCTestCase {
         }
     }
     
-    // MARK: - 生成 README 截图素材
-    func testGenerateScreenshots() {
+    // MARK: - 预览与图片长图渲染测试
+    func testTicketPreviewImageGeneration() {
         let ticket58 = LinePrinter.ticket(
             autoCut: true,
             .text("味美餐饮旗舰店", bold: true, alignment: .center),
@@ -445,11 +445,10 @@ class Tests: XCTestCase {
             .blank
         )
         
-        if let img58 = ticket58.previewImage(paperWidth: .mm58),
-           let data = UIImagePNGRepresentation(img58) {
-            let path = "/Users/xjx/Downloads/Mac backup/Code/DEV/LinePrinter/Screenshots/receipt_58mm.png"
-            try? data.write(to: URL(fileURLWithPath: path))
-        }
+        let img58 = ticket58.previewImage(paperWidth: .mm58)
+        XCTAssertNotNil(img58, "58mm 小票长图渲染失败")
+        XCTAssertGreaterThan(img58?.size.width ?? 0, 0)
+        XCTAssertGreaterThan(img58?.size.height ?? 0, 0)
         
         let ticket80 = LinePrinter.ticket(
             autoCut: true,
@@ -470,11 +469,10 @@ class Tests: XCTestCase {
             .blank
         )
         
-        if let img80 = ticket80.previewImage(paperWidth: .mm80),
-           let data = UIImagePNGRepresentation(img80) {
-            let path = "/Users/xjx/Downloads/Mac backup/Code/DEV/LinePrinter/Screenshots/receipt_80mm.png"
-            try? data.write(to: URL(fileURLWithPath: path))
-        }
+        let img80 = ticket80.previewImage(paperWidth: .mm80)
+        XCTAssertNotNil(img80, "80mm 小票长图渲染失败")
+        XCTAssertGreaterThan(img80?.size.width ?? 0, 0)
+        XCTAssertGreaterThan(img80?.size.height ?? 0, 0)
     }
 }
 
