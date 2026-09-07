@@ -189,23 +189,23 @@ public extension Chunk {
     }
     
     /// 多列自定义排版行
-    static func row(totalWidth: Int = 32, _ columns: Line...) -> Self {
+    static func row(totalWidth: Int = 32, _ columns: Col...) -> Self {
         Chunk(Row(totalWidth: totalWidth, columns: columns))
     }
 
     /// 快捷双列排版（左侧居左，右侧居右）
     static func row(_ left: String, _ right: String, totalWidth: Int = 32, wrap: Bool = false) -> Self {
         Chunk(Row(totalWidth: totalWidth,
-                  Line(left, weight: 1, alignment: .left, wrap: wrap),
-                  Line(right, weight: 1, alignment: .right)))
+                  Col(left, weight: 1, alignment: .left, wrap: wrap),
+                  Col(right, weight: 1, alignment: .right)))
     }
     
     /// 快捷三列排版（左品名 2 权重，中数量 1 权重，右金额 1 权重）
     static func row(_ col1: String, _ col2: String, _ col3: String, totalWidth: Int = 32, wrap: Bool = false) -> Self {
         Chunk(Row(totalWidth: totalWidth,
-                  Line(col1, weight: 2, alignment: .left, wrap: wrap),
-                  Line(col2, weight: 1, alignment: .center),
-                  Line(col3, weight: 1, alignment: .right)))
+                  Col(col1, weight: 2, alignment: .left, wrap: wrap),
+                  Col(col2, weight: 1, alignment: .center),
+                  Col(col3, weight: 1, alignment: .right)))
     }
 
     /// 双列排版（别名支持）

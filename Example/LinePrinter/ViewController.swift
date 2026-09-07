@@ -76,9 +76,9 @@ class ViewController: UIViewController {
             .splitter("-", printDensity: printDensity),
             // 3. 三列明细表头
             .row(totalWidth: totalWidth,
-                 Line("品名", weight: 2, alignment: .left),
-                 Line("数量", weight: 1, alignment: .center),
-                 Line("金额", weight: 1, alignment: .right)),
+                 Col("品名", weight: 2, alignment: .left),
+                 Col("数量", weight: 1, alignment: .center),
+                 Col("金额", weight: 1, alignment: .right)),
             .splitter("-", printDensity: printDensity),
             // 5. 菜品列表（直接使用统一的 .row，开启智能折行 wrap: true）
             .row("招牌老坛酸菜无骨黑鱼饭(大份)", "x1", "38.00", totalWidth: totalWidth, wrap: true),

@@ -1,5 +1,5 @@
 //
-//  Line.swift
+//  Row.swift
 //  LinePrinter
 //
 //  Created by Nelo on 2022/4/20.
@@ -9,16 +9,13 @@ import Foundation
 
 /// 小票多列排版中的单列配置项
 ///
-/// 定义了一列的文本内容、宽度/权重计算方式、对齐方式以及是否开启超长换行。
+/// 定义了一列的文本内容、宽度/权重分配方式、对齐方式以及是否开启超长折行。
 ///
 /// ```swift
-/// // 品名列：占 2 权重，靠左对齐，开启超长自动折行
-/// Line("招牌老坛酸菜黑鱼饭(超大份)", weight: 2, alignment: .left, wrap: true)
-///
-/// // 金额列：固定或自适应宽度，靠右对齐
-/// Line("38.00", weight: 1, alignment: .right)
+/// Col("招牌老坛酸菜鱼", weight: 2, alignment: .left, wrap: true)
+/// Col("38.00", weight: 1, alignment: .right)
 /// ```
-public struct Line {
+public struct Col {
     /// 该列显示的文本内容
     public let text: String
     
@@ -41,7 +38,13 @@ public struct Line {
     ///   - weight: 权重比例，默认为 1
     ///   - alignment: 对齐方式，默认为居左 `.left`
     ///   - wrap: 超长文本是否自动折行，默认为 `false`
-    public init(_ text: String, width: Int? = nil, weight: Int = 1, alignment: Commands.Alignment = .left, wrap: Bool = false) {
+    public init(
+        _ text: String,
+        width: Int? = nil,
+        weight: Int = 1,
+        alignment: Commands.Alignment = .left,
+        wrap: Bool = false
+    ) {
         self.text = text
         self.width = width
         self.weight = max(1, weight)
@@ -50,31 +53,29 @@ public struct Line {
     }
 }
 
-/// 多列排版行组件
+/// 列别名
+public typealias Column = Col
+public typealias Line = Col
+
+/// 多列排版行组件（属于 Element 排版元素）
 ///
-/// 精确测算中英文显示宽度，支持自适应权重分配，完美保持小票各列竖向垂直对齐。
+/// 精确测算中英文全半角宽度，支持自适应权重比例分配，保持小票各列竖向垂直对齐。
 public struct Row: Printable {
     
     /// 整行总字符宽度（58mm 纸宽通常为 32，80mm 纸宽通常为 48，默认为 32）
     public var totalWidth: Int
     
     /// 包含的列配置列表
-    public private(set) var columns: [Line]
+    public private(set) var columns: [Col]
     
     /// 初始化多列排版行（数组形式）
-    /// - Parameters:
-    ///   - totalWidth: 行总宽度，默认 32
-    ///   - columns: 列配置数组
-    public init(totalWidth: Int = 32, columns: [Line]) {
+    public init(totalWidth: Int = 32, columns: [Col]) {
         self.totalWidth = totalWidth
         self.columns = columns
     }
     
     /// 初始化多列排版行（变长参数形式）
-    /// - Parameters:
-    ///   - totalWidth: 行总宽度，默认 32
-    ///   - columns: 变长列配置
-    public init(totalWidth: Int = 32, _ columns: Line...) {
+    public init(totalWidth: Int = 32, _ columns: Col...) {
         self.totalWidth = totalWidth
         self.columns = columns
     }
@@ -189,7 +190,6 @@ public struct Row: Printable {
         } else if currentWidth < targetWidth {
             return text.padToPrintWidth(targetWidth, alignment: alignment)
         } else {
-            // 宽度超出时截断
             var truncated = ""
             var currentW = 0
             for char in text {

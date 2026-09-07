@@ -82,17 +82,17 @@ extension ChunkModel {
             let l = left ?? ""
             let r = right ?? ""
             return Chunk(Row(totalWidth: totalWidth ?? 32,
-                             Line(l, weight: 1, alignment: .left, wrap: wrap ?? false),
-                             Line(r, weight: 1, alignment: .right)), feedPoints: feed)
+                             Col(l, weight: 1, alignment: .left, wrap: wrap ?? false),
+                             Col(r, weight: 1, alignment: .right)), feedPoints: feed)
             
         case "threeColumn":
             let c1 = col1 ?? ""
             let c2 = col2 ?? ""
             let c3 = col3 ?? ""
             return Chunk(Row(totalWidth: totalWidth ?? 32,
-                             Line(c1, weight: 2, alignment: .left, wrap: wrap ?? false),
-                             Line(c2, weight: 1, alignment: .center),
-                             Line(c3, weight: 1, alignment: .right)), feedPoints: feed)
+                             Col(c1, weight: 2, alignment: .left, wrap: wrap ?? false),
+                             Col(c2, weight: 1, alignment: .center),
+                             Col(c3, weight: 1, alignment: .right)), feedPoints: feed)
             
         case "barcode":
             guard let content = content else { return nil }
