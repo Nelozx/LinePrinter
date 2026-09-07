@@ -1,5 +1,5 @@
 PODS:
-  - LinePrinter (0.3.0)
+  - LinePrinter (0.5.0)
 
 DEPENDENCIES:
   - LinePrinter (from `../`)
@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  LinePrinter: 10ed4c059c7a57673918a0212b37b3b2ffd4e555
+  LinePrinter: c73b7bab71f6f6b24f8a1f2dc579705d0acf7a03
 
 PODFILE CHECKSUM: 45c6cc3a80a7eac5e92e873fe2064aa2de208576
 

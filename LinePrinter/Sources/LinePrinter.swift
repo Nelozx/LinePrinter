@@ -44,9 +44,19 @@ public enum LinePrinter {
         Ticket(chunks: chunks, autoInitialize: true, autoCut: false)
     }
 
-    /// 解析服务端下发的 JSON 构建小票对象
+    /// 解析服务端下发的标准 JSON 构建小票对象
     public static func ticket(json: String) throws -> Ticket { try Ticket(json: json) }
     public static func ticket(json: Data) throws -> Ticket { try Ticket(json: json) }
+    
+    /// 使用自定义映射闭包解析公司私有格式 JSON 字符串构建小票
+    public static func ticket(json string: String, mapper: (Any) throws -> Ticket) throws -> Ticket {
+        try Ticket(json: string, mapper: mapper)
+    }
+
+    /// 使用自定义映射闭包解析公司私有格式 JSON 数据构建小票
+    public static func ticket(json data: Data, mapper: (Any) throws -> Ticket) throws -> Ticket {
+        try Ticket(json: data, mapper: mapper)
+    }
     
     /// 由排版块直接生成连续的 ESC/POS 二进制字节流（变长参数直出）
     public static func bytes(_ chunks: Chunk...) -> Data {

@@ -535,5 +535,86 @@ class Tests: XCTestCase {
         XCTAssertEqual(ticket.chunks.count, 3)
         XCTAssertFalse(mock.receivedData.isEmpty)
     }
+    
+    // MARK: - 自定义公司业务模型 TicketConvertible 测试
+    func testTicketConvertibleBusinessModel() {
+        struct CompanyOrderDTO: Codable, TicketConvertible {
+            let orderNo: String
+            let storeName: String
+            let totalAmount: Double
+            
+            func asTicket(paper: ReceiptPaperWidth) -> Ticket {
+                LinePrinter.ticket(
+                    .text(storeName, bold: true, alignment: .center),
+                    .splitter("-"),
+                    .text("单号：\(orderNo)"),
+                    .row("实付金额", String(format: "￥%.2f", totalAmount)),
+                    .cut
+                )
+            }
+        }
+        
+        let order = CompanyOrderDTO(orderNo: "ORDER-2026-999", storeName: "真功夫快餐", totalAmount: 45.50)
+        let ticket = order.asTicket()
+        XCTAssertEqual(ticket.chunks.count, 5)
+        
+        let bytes = ticket.bytes(using: .gbk)
+        XCTAssertFalse(bytes.isEmpty)
+        
+        // 门面转换测试
+        let ticketFromFacade = LinePrinter.ticket(order)
+        XCTAssertEqual(ticketFromFacade.chunks.count, 5)
+    }
+    
+    // MARK: - 公司私有/任意非标 JSON 适配转换器测试
+    func testCustomJSONMapper() {
+        let proprietaryJSON = """
+        {
+          "errcode": 0,
+          "data": {
+            "bill_title": "第三方外卖自动接单",
+            "dish_list": [
+              { "title": "招牌黄焖鸡米饭", "count": 2, "price": "40.00" }
+            ],
+            "pay_sum": "40.00"
+          }
+        }
+        """
+        
+        do {
+            let ticket = try LinePrinter.ticket(json: proprietaryJSON) { root in
+                guard let dict = root as? [String: Any],
+                      let data = dict["data"] as? [String: Any] else {
+                    throw NSError(domain: "Test", code: -1)
+                }
+                
+                let title = data["bill_title"] as? String ?? ""
+                let dishes = data["dish_list"] as? [[String: Any]] ?? []
+                let paySum = data["pay_sum"] as? String ?? ""
+                
+                var chunks: [Chunk] = [
+                    .text(title, bold: true, alignment: .center),
+                    .splitter
+                ]
+                for dish in dishes {
+                    let dName = dish["title"] as? String ?? ""
+                    let count = dish["count"] as? Int ?? 1
+                    let price = dish["price"] as? String ?? ""
+                    chunks.append(.row(dName, "x\(count)", price, wrap: true))
+                }
+                chunks.append(.splitter)
+                chunks.append(.row("合计", "￥\(paySum)"))
+                chunks.append(.feedAndCut)
+                
+                return Ticket(chunks: chunks)
+            }
+            
+            XCTAssertEqual(ticket.chunks.count, 6)
+            XCTAssertFalse(ticket.bytes().isEmpty)
+        } catch {
+            XCTFail("私有 JSON 映射失败: \(error)")
+        }
+    }
 }
+
 
