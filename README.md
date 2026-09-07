@@ -1,50 +1,57 @@
 # LinePrinter
 
+<p align="right">
+  <a href="README_CN.md"><b>简体中文</b></a> | <b>English</b>
+</p>
+
 [![Swift 5.0+](https://img.shields.io/badge/Swift-5.0+-orange.svg?style=flat)](https://swift.org)
 [![Platform iOS](https://img.shields.io/badge/Platform-iOS%2012.0+-lightgrey.svg?style=flat)](https://developer.apple.com/ios/)
 [![SPM Compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg?style=flat)](https://swift.org/package-manager/)
 [![CocoaPods](https://img.shields.io/badge/CocoaPods-v0.3.0-blue.svg?style=flat)](https://cocoapods.org)
 [![License MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat)](https://github.com/Nelozx/LinePrinter/blob/main/LICENSE)
 
-`LinePrinter` 是一个专为 iOS 设计的 **纯原生、零依赖、无侵入的 ESC/POS 热敏小票声明式排版引擎**。适用于餐饮结账、外卖出单、零售收银、商超购物单与仓储标签等全行业业务场景。
+`LinePrinter` is a pure native, zero-dependency, and non-intrusive **declarative ESC/POS thermal receipt layout engine and visual previewer** designed for iOS. Tailored for restaurant dining, takeout tickets, retail checkout, supermarkets, and warehouse logistics.
 
-本库的核心职责是**专注于小票声明式排版与标准 ESC/POS 二进制指令流（`Data`）的生成**。库内不强行绑定蓝牙或网络通信连接，彻底避免与您项目原有的蓝牙管理器（`CBCentralManager`）、网络连接池或一体机商用硬件 SDK（如商米、联迪、拉卡拉等）发生冲突，也**无需在 `Info.plist` 中声明任何蓝牙或局域网敏感权限**。
+The core mission of `LinePrinter` is **declarative receipt layout, binary ESC/POS command stream (`Data`) generation, and realistic UI simulation**. It does not enforce Bluetooth or network connection management, completely avoiding conflicts with your app's existing `CBCentralManager`, network connection pools, or commercial POS hardware SDKs (e.g., Sunmi, Landi, Newland). **No sensitive Bluetooth or local network permissions are required in `Info.plist`**.
 
 ---
 
-## 📸 效果演示 (Screenshots)
+## 📸 Visual Showcase (Screenshots)
 
 <p align="center">
-  <img src="Screenshots/demo.png" width="280" alt="Demo App 交互演示" style="margin-right: 16px; border-radius: 8px;" />
-  <img src="Screenshots/receipt_58mm.png" width="260" alt="58mm 餐饮多列折行小票" style="margin-right: 16px; border-radius: 8px;" />
-  <img src="Screenshots/receipt_80mm.png" width="280" alt="80mm 超市购物小票" style="border-radius: 8px;" />
+  <img src="Screenshots/demo.png" width="280" alt="Demo App Interactive Flow" style="margin-right: 16px; border-radius: 8px;" />
+  <img src="Screenshots/receipt_58mm.png" width="260" alt="58mm Restaurant Receipt" style="margin-right: 16px; border-radius: 8px;" />
+  <img src="Screenshots/receipt_80mm.png" width="280" alt="80mm Supermarket Receipt" style="border-radius: 8px;" />
 </p>
 
-| **📱 真实物理出纸仿真与交互** | **🧾 58mm 餐饮多列智能折行小票** | **🏬 80mm 超市购物宽幅小票** |
+| **📱 Physical Feed & Interactive Simulation** | **🧾 58mm Restaurant Multi-Column Wrapping** | **🏬 80mm Supermarket Wide Receipt** |
 | :---: | :---: | :---: |
-| 仿打印机出纸口物理吐纸、触觉震动反馈 | 智能三列权重分配、超长菜品名自动折行 | 48 字符宽幅对齐、Code128 工业条码渲染 |
+| Realistic paper feed translation & haptic feedback | Smart weight distribution & long item name wrapping | 48-char wide layout & Code128 barcode rendering |
 
 ---
 
-## ✨ 核心特性
+## ✨ Key Features
 
-- 🎯 **纯排版引擎与通信彻底解耦**：
-  - 直接生成标准连续的 ESC/POS 二进制指令流（`ticket.bytes(using: .gbk) -> Data`）；
-  - 提供极简通道协议 `PrinterTransport`（`ticket.print(to: transport)`），任意外部通信对象均可实现即插即用。
-- 🛡️ **纯原生、零依赖、零敏感权限**：仅依赖基础 `UIKit`，不包含任何第三方库，宿主 App 无需声明任何额外的硬件网络权限。
-- 📊 **智能多列对齐与超长折行**：精确测算全角中文与半角英数显示宽度，支持多列权重分配；内置**超长菜品名智能自动换行（`wrap: true`）**，数量和金额列始终保持垂直对齐。
-- 🖼️ **工业级点阵位图算法**：直接扩展 `UIImage.rasterEscPosData`，内置 **灰度阈值** 与 **Floyd-Steinberg 误差扩散抖动** 算法，单色热敏纸也能清晰呈现 Logo 与照片层次。
-- 🇨🇳 **中文防乱码支持**：深度适配 GB18030 / GBK 汉字编码。
-- 🔍 **硬件状态字节解析**：内置 `PrinterHardwareStatus.parse(byte:)`，无论外部通过蓝牙 Notify 还是 Socket 收到单字节状态回传，即可实时解析**缺纸、开盖、脱机**等异常。
-- 📱 **声明式 DSL 排版语法**：结构清晰如 SwiftUI，开箱即用。
+- 🎯 **Decoupled Layout Engine & Transport**:
+  - Compiles directly into standard ESC/POS binary data (`ticket.bytes(using: .gbk) -> Data`);
+  - Provides a lightweight channel protocol `PrinterTransport` (`ticket.print(to: transport)`), making any external communication interface plug-and-play.
+- 🛡️ **Zero Dependencies & Zero Permissions**: Built strictly on top of `UIKit` and standard system libraries. No 3rd-party dependencies, no permission declarations needed.
+- 👁️ **High-Fidelity Visual Previewer (`TicketPreview`)**:
+  - Realistic thermal paper aesthetics: chamfered top cut, serrated bottom tear-off edge, and soft shadows;
+  - Generate a live interactive preview (`ticket.previewView()`) or export a high-res Retina (2x) long image (`ticket.previewImage()`) in a single line of code.
+- 📊 **Smart Multi-Column Alignment & Auto-Wrapping**: Accurately computes display widths for full-width CJK characters and half-width ASCII; features **intelligent text wrapping (`wrap: true`)** while preserving price and quantity vertical alignment.
+- 🖼️ **Industrial Bitmap Algorithms**: Native extension for `UIImage.rasterEscPosData` with both **Luminance Threshold** and **Floyd-Steinberg Error Diffusion Dithering**, delivering sharp logos and smooth gradient photos on 1-bit thermal paper.
+- 🇨🇳 **Chinese Encoding Support**: Deeply optimized for GB18030 / GBK encoding to prevent garbled text.
+- 🔍 **Hardware Status Parser**: Built-in `PrinterHardwareStatus.parse(byte:)` to instantly parse real-time error flags like **Out of Paper**, **Cover Open**, or **Offline**.
+- 📱 **Declarative Swift DSL**: SwiftUI-like structure, clean and expressive.
 
 ---
 
-## 📦 安装方式
+## 📦 Installation
 
-### Swift Package Manager (推荐)
+### Swift Package Manager (Recommended)
 
-在 Xcode 中选择 `File` -> `Add Packages...`，输入仓库地址：
+In Xcode, navigate to `File` -> `Add Packages...` and enter the repository URL:
 
 ```
 https://github.com/Nelozx/LinePrinter.git
@@ -52,152 +59,168 @@ https://github.com/Nelozx/LinePrinter.git
 
 ### CocoaPods
 
-在 `Podfile` 中直接通过 GitHub 仓库引入：
+Add the following to your `Podfile`:
 
 ```ruby
-# 方式 A：指定发布的稳定 Tag 版本 (推荐)
+# Option A: Specify the tagged release version (Recommended)
 pod 'LinePrinter', :git => 'https://github.com/Nelozx/LinePrinter.git', :tag => '0.3.0'
 
-# 方式 B：直接追踪主分支最新代码
+# Option B: Track the latest main branch
 pod 'LinePrinter', :git => 'https://github.com/Nelozx/LinePrinter.git'
 ```
 
 ---
 
-## 🚀 快速上手
+## 🚀 Quick Start
 
-### 1. 声明式构建一张小票
+### 1. Build a Receipt Declaratively
 
 ```swift
 import LinePrinter
 
 let ticket = Ticket(
     chunks: [
-        // 1. 店铺标题 (加粗居中)
-        .text("味美餐饮旗舰店", bold: true, alignment: .center),
-        .text("-- 欢迎光临 --", attributes: [TextAttribute.alignment(.center)]),
+        // 1. Header (Bold & Centered)
+        .text("Gourmet Restaurant Flagship", bold: true, alignment: .center),
+        .text("-- Welcome --", attributes: [TextAttribute.alignment(.center)]),
         .splitter,
         
-        // 2. 基础单号信息
-        .text("单号：NO.20220419001"),
-        .text("时间：2022-04-19 12:30:00"),
+        // 2. Order Metadata
+        .text("Order No: NO.20260907001"),
+        .text("Time: 2026-09-07 12:30:00"),
         .splitter,
         
-        // 3. 多列表头 (品名 2 权重、数量 1 权重、金额 1 权重)
+        // 3. Multi-Column Header (Item: weight 2, Qty: weight 1, Price: weight 1)
         .row(totalWidth: 32,
-             LineColumn("品名", weight: 2, alignment: .left),
-             LineColumn("数量", weight: 1, alignment: .center),
-             LineColumn("金额", weight: 1, alignment: .right)),
+             LineColumn("Item", weight: 2, alignment: .left),
+             LineColumn("Qty", weight: 1, alignment: .center),
+             LineColumn("Amount", weight: 1, alignment: .right)),
         .splitter(char: "-"),
         
-        // 4. 明细 (支持超长菜名智能折行 wrap: true)
-        .threeColumn("招牌老坛酸菜无骨黑鱼饭(超大份)", "x1", "38.00", wrap: true),
-        .threeColumn("秘制卤蛋", "x2", "6.00"),
-        .threeColumn("冰镇可乐", "x1", "5.00"),
+        // 4. Line Items (Supports smart text wrapping with wrap: true)
+        .threeColumn("Signature Pickled Fish Rice Bowl (Large)", "x1", "38.00", wrap: true),
+        .threeColumn("Braised Spiced Egg", "x2", "6.00"),
+        .threeColumn("Iced Soda Drink", "x1", "5.00"),
         .splitter,
         
-        // 5. 汇总金额 (两端对齐)
-        .twoColumn("原价合计", "￥49.00"),
-        .twoColumn("会员优惠", "-￥9.00"),
-        .twoColumn("实付金额", "￥40.00"),
+        // 5. Total & Discounts
+        .twoColumn("Subtotal", "$49.00"),
+        .twoColumn("VIP Discount", "-$9.00"),
+        .twoColumn("Total Paid", "$40.00"),
         .splitter,
         
-        // 6. 二维码与条形码
-        .text("扫码开具电子发票", attributes: [TextAttribute.alignment(.center)]),
+        // 6. QR Code & Barcode
+        .text("Scan for e-Invoice", attributes: [TextAttribute.alignment(.center)]),
         .qrcode("https://weixin.qq.com/r/example_invoice"),
-        .barcode("20220419001", type: .code128),
+        .barcode("20260907001", type: .code128),
         
-        // 7. 尾部提示与走纸
-        .text("多谢惠顾，欢迎再次光临！", attributes: [TextAttribute.alignment(.center)]),
+        // 7. Footer & Paper Feed
+        .text("Thank you for your visit!", attributes: [TextAttribute.alignment(.center)]),
         .feed(lines: 4)
     ],
-    autoInitialize: true,  // 自动在头部执行 ESC @ 初始化
-    autoCut: true         // 自动在小票结尾走纸并切纸
+    autoInitialize: true,  // Automatically sends ESC @ at the beginning
+    autoCut: true         // Automatically feeds and cuts paper at the end
 )
 ```
 
 ---
 
-### 2. 输出小票数据（完全由外部自由发送）
+### 2. Dispatch Binary Data (Completely Decoupled)
 
-#### 方式 A：直接获取纯连续二进制流（推荐）
+#### Approach A: Direct Raw Binary Stream (`Data`) (Recommended)
 
 ```swift
-// 1. 生成标准的 ESC/POS 连续二进制数据
+// 1. Generate standard ESC/POS continuous binary data
 let data: Data = ticket.bytes(using: .gbk)
 
-// 2. 外部自由下发（按你自己项目的现有连接方式发送）：
+// 2. Transmit via your app's existing pipeline:
 
-// 场景 1：写入你已连接的低功耗蓝牙外设
+// Scenario 1: Write to connected CoreBluetooth peripheral
 myPeripheral.writeValue(data, for: myCharacteristic, type: .withoutResponse)
 
-// 场景 2：写入你自己的局域网 TCP Socket
+// Scenario 2: Write to your local TCP Socket
 myTcpSocket.write(data)
 
-// 场景 3：直接传给商米 / 联迪 / 新大陆等一体机硬件 SDK
+// Scenario 3: Forward to commercial POS hardware SDKs (Sunmi / Landi / Newland)
 SunmiPrinterService.shared.sendRAWData(data)
 ```
 
-#### 方式 B：通过极简输出协议 `PrinterTransport`
+#### Approach B: Via `PrinterTransport` Protocol
 
-让你的通信管理类遵循 `PrinterTransport` 协议即可：
+Conform your communication manager to `PrinterTransport`:
 
 ```swift
 class MyBluetoothManager: PrinterTransport {
     func write(_ data: Data) {
-        // 在此执行分包发送或直接写入外设特征值
         currentPeripheral?.writeValue(data, for: writeChar, type: .withoutResponse)
     }
 }
 
 let transport = MyBluetoothManager()
-// 直接将小票输出到通道
+// Print directly through transport
 ticket.print(to: transport, encoding: .gbk)
 ```
 
 ---
 
-### 3. 硬件状态解析（可选）
+### 3. Visual UI Preview & High-Res Image Export
 
-无论外部通过蓝牙特征值通知，还是 TCP Socket 收到打印机回传的状态字节，均可直接调用内置解析器：
+Inspect physical paper aesthetics and layout on screen without connecting to a hardware printer:
 
 ```swift
-let status = PrinterHardwareStatus.parse(byte: receivedByte)
+// 1. Obtain live preview UIView and insert into UI hierarchy
+let previewView = ticket.previewView(paperWidth: .mm58)
+myContainerView.addSubview(previewView)
 
-if status.contains(.paperEmpty) {
-    print("⚠️ 打印机缺纸！")
-}
-if status.contains(.coverOpen) {
-    print("⚠️ 机盖已打开！")
-}
-if status.contains(.offline) {
-    print("⚠️ 打印机脱机！")
+// 2. Export as high-resolution Retina UIImage (Save to Photos or share)
+if let receiptImage = ticket.previewImage(paperWidth: .mm58) {
+    UIImageWriteToSavedPhotosAlbum(receiptImage, nil, nil, nil)
 }
 ```
 
 ---
 
-## 🎨 常用 DSL 排版元素速查
+### 4. Real-time Hardware Status Parsing (Optional)
 
-| DSL 排版 API | 说明 |
-|---|---|
-| `.text("内容", bold: true, alignment: .center)` | 带样式的文本，支持居左/中/右对齐、加粗与样式自动复位 |
-| `.splitter(char: "-")` | 自适应行宽的分割线 |
-| `.twoColumn("原价", "￥50")` | 快速两列左右对齐 |
-| `.threeColumn("品名", "x1", "35.00", wrap: true)` | 快速三列对齐（支持超长菜品名自动换行） |
-| `.row(totalWidth: 32, ...)` | 自定义多列对齐（支持各列设置固定宽度或权重比例） |
-| `.group(...)` | 垂直块分组容器 |
-| `.image(uiImage, dither: .floydSteinberg)` | 打印位图，支持灰度阈值法与误差扩散抖动 |
-| `.qrcode("https://...")` | ESC/POS 原生二维码 |
-| `.barcode("123456", type: .code128)` | 一维条形码 |
-| `.openDrawer` | 弹出收银钱箱 |
-| `.cut` / `.partialCut` / `.feedAndCut` | 全切纸 / 半切纸 / 进纸切纸 |
-| `.feed(lines: 3)` | 走纸指定行数 |
+Whether notified via Bluetooth characteristic notification or received from a TCP socket response:
+
+```swift
+let status = PrinterHardwareStatus.parse(byte: receivedByte)
+
+if status.contains(.paperEmpty) {
+    print("⚠️ Printer is out of paper!")
+}
+if status.contains(.coverOpen) {
+    print("⚠️ Platen cover is open!")
+}
+if status.contains(.offline) {
+    print("⚠️ Printer is offline!")
+}
+```
 
 ---
 
-## 📄 开源协议与贡献
+## 🎨 DSL Elements Quick Reference
 
-- 协议：[MIT License](LICENSE)
-- 更新记录：[CHANGELOG.md](CHANGELOG.md)
-- 参与贡献：[CONTRIBUTING.md](CONTRIBUTING.md)
+| DSL Element | Description |
+|---|---|
+| `.text("Content", bold: true, alignment: .center)` | Styled text with auto-reset alignment, size, and weight |
+| `.splitter(char: "-")` | Responsive full-width horizontal separator line |
+| `.twoColumn("Left", "Right")` | Quick two-column aligned layout |
+| `.threeColumn("Name", "Qty", "Price", wrap: true)` | Three-column layout with optional auto-wrapping for long names |
+| `.row(totalWidth: 32, ...)` | Fully customizable multi-column layout with fixed widths or weights |
+| `.group(...)` | Vertical block container |
+| `.image(uiImage, dither: .floydSteinberg)` | Raster bitmap with thresholding or Floyd-Steinberg error diffusion |
+| `.qrcode("https://...")` | ESC/POS native hardware QR code |
+| `.barcode("123456", type: .code128)` | Standard 1D barcode (Code128, EAN13, etc.) |
+| `.openDrawer` | Sends cash drawer pulse |
+| `.cut` / `.partialCut` / `.feedAndCut` | Full cut / Partial cut / Feed & Cut |
+| `.feed(lines: 3)` | Feed paper by specified number of lines |
+
+---
+
+## 📄 License & Contributing
+
+- License: [MIT License](LICENSE)
+- Changelog: [CHANGELOG.md](CHANGELOG.md)
+- Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
