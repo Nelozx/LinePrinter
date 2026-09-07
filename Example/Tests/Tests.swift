@@ -520,5 +520,30 @@ class Tests: XCTestCase {
         let data = ticket.bytes(using: .utf8)
         XCTAssertFalse(data.isEmpty)
     }
+    
+    // MARK: - Fluent Chaining 纯链式调用测试
+    func testTicketFluentChaining() {
+        let hasCoupon = true
+        let items = [("招牌酸菜鱼", "x1", "38.00"), ("冰镇可乐", "x2", "6.00")]
+        
+        let ticket = Ticket.make(autoInitialize: true, autoCut: true)
+            .text("美味餐厅", bold: true, alignment: .center)
+            .splitter()
+            .forEach(items) { t, item in
+                t.threeColumn(item.0, item.1, item.2, wrap: true)
+            }
+            .when(hasCoupon) { $0.twoColumn("优惠券抵扣", "-￥10.00") }
+            .splitter()
+            .twoColumn("实付总计", "￥34.00")
+            .qrcode("https://weixin.qq.com")
+            .cut()
+        
+        XCTAssertTrue(ticket.autoInitialize)
+        XCTAssertTrue(ticket.autoCut)
+        XCTAssertEqual(ticket.chunks.count, 9) // 包含最后的 .cut
+        
+        let bytes = ticket.bytes(using: .utf8)
+        XCTAssertFalse(bytes.isEmpty)
+    }
 }
 
