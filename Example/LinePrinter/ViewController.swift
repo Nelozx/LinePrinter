@@ -58,68 +58,63 @@ class ViewController: UIViewController {
 
     // MARK: - 构建小票模型
     private func buildTicket(totalWidth: Int) -> Ticket {
-        var chunks: [Chunk] = [
+        let logoImage = UIImage(named: "good") ?? makeDemoLogoImage()
+        let printDensity = totalWidth == 32 ? 384 : 576
+        
+        return Ticket(autoInitialize: true, autoCut: true) {
             // 1. 顶部蜂鸣器（后厨出单提醒）与行间距优化
-            .lineSpacing(22)
-        ]
-        
-        // 2. 顶部店铺 Logo 图案 (单色位图抖动打印)
-        if let logo = UIImage(named: "good") ?? makeDemoLogoImage() {
-            chunks.append(.image(logo, dither: .floydSteinberg))
-        }
-        
-        // 3. 店铺名 (加粗居中) 与单号时间
-        chunks.append(contentsOf: [
-            .text("味美餐饮旗舰店", bold: true, alignment: .center),
-            .text("-- 欢迎光临 --", attributes: [TextAttribute.alignment(.center)]),
-            .splitter(char: "-", printDensity: totalWidth == 32 ? 384 : 576),
+            Chunk.lineSpacing(22)
             
-            .text("单号：NO.20260907001"),
-            .text("时间：2026-09-07 12:30:00"),
-            .text("收银员：01号"),
-            .splitter(char: "-", printDensity: totalWidth == 32 ? 384 : 576),
+            // 2. 顶部店铺 Logo 图案 (原生 if 条件解包，单色位图抖动打印)
+            if let logo = logoImage {
+                Chunk.image(logo, dither: .floydSteinberg)
+            }
+            
+            // 3. 店铺名 (加粗居中) 与单号时间
+            Chunk.text("味美餐饮旗舰店", bold: true, alignment: .center)
+            Chunk.text("-- 欢迎光临 --", attributes: [TextAttribute.alignment(.center)])
+            Chunk.splitter(char: "-", printDensity: printDensity)
+            
+            Chunk.text("单号：NO.20260907001")
+            Chunk.text("时间：2026-09-07 12:30:00")
+            Chunk.text("收银员：01号")
+            Chunk.splitter(char: "-", printDensity: printDensity)
             
             // 4. 三列明细表头
-            .row(totalWidth: totalWidth,
-                 LineColumn("品名", weight: 2, alignment: .left),
-                 LineColumn("数量", weight: 1, alignment: .center),
-                 LineColumn("金额", weight: 1, alignment: .right)),
-            .splitter(char: "-", printDensity: totalWidth == 32 ? 384 : 576),
+            Chunk.row(totalWidth: totalWidth,
+                      LineColumn("品名", weight: 2, alignment: .left),
+                      LineColumn("数量", weight: 1, alignment: .center),
+                      LineColumn("金额", weight: 1, alignment: .right))
+            Chunk.splitter(char: "-", printDensity: printDensity)
             
             // 5. 菜品列表（开启智能折行 wrap: true）
-            .threeColumn("招牌老坛酸菜无骨黑鱼饭(大份)", "x1", "38.00", totalWidth: totalWidth, wrap: true),
-            .threeColumn("秘制香辣鸭头", "x2", "16.00", totalWidth: totalWidth, wrap: true),
-            .threeColumn("冰镇大麦若叶汁", "x1", "8.00", totalWidth: totalWidth, wrap: true),
-            .splitter(char: "-", printDensity: totalWidth == 32 ? 384 : 576),
+            Chunk.threeColumn("招牌老坛酸菜无骨黑鱼饭(大份)", "x1", "38.00", totalWidth: totalWidth, wrap: true)
+            Chunk.threeColumn("秘制香辣鸭头", "x2", "16.00", totalWidth: totalWidth, wrap: true)
+            Chunk.threeColumn("冰镇大麦若叶汁", "x1", "8.00", totalWidth: totalWidth, wrap: true)
+            Chunk.splitter(char: "-", printDensity: printDensity)
             
             // 6. 账单汇总
-            .twoColumn("原价合计", "￥62.00", totalWidth: totalWidth),
-            .twoColumn("会员优惠券", "-￥12.00", totalWidth: totalWidth),
-            .twoColumn("实付金额", "￥50.00", totalWidth: totalWidth),
-            .splitter(char: "=", printDensity: totalWidth == 32 ? 384 : 576),
+            Chunk.twoColumn("原价合计", "￥62.00", totalWidth: totalWidth)
+            Chunk.twoColumn("会员优惠券", "-￥12.00", totalWidth: totalWidth)
+            Chunk.twoColumn("实付金额", "￥50.00", totalWidth: totalWidth)
+            Chunk.splitter(char: "=", printDensity: printDensity)
             
             // 7. 支付信息与加粗取餐号
-            .text("支付方式：微信支付"),
-            .text("【取餐号：A088】", bold: true, alignment: .center),
-            .splitter(char: "-", printDensity: totalWidth == 32 ? 384 : 576),
+            Chunk.text("支付方式：微信支付")
+            Chunk.text("【取餐号：A088】", bold: true, alignment: .center)
+            Chunk.splitter(char: "-", printDensity: printDensity)
             
             // 8. 电子发票二维码与一维条码（带下方 HRI 数字）
-            .text("扫码开具增值税电子发票", attributes: [TextAttribute.alignment(.center)]),
-            .qrcode("https://weixin.qq.com/r/lineprinter_demo"),
-            .barcode("20260907001", type: .code128, height: 60, width: 2, hri: .below),
+            Chunk.text("扫码开具增值税电子发票", attributes: [TextAttribute.alignment(.center)])
+            Chunk.qrcode("https://weixin.qq.com/r/lineprinter_demo")
+            Chunk.barcode("20260907001", type: .code128, height: 60, width: 2, hri: .below)
             
             // 9. 结尾问候与出单提示
-            .text("多谢惠顾，欢迎再次光临！", attributes: [TextAttribute.alignment(.center)]),
-            .defaultLineSpacing,
-            .buzzer(times: 2), // 蜂鸣 2 次提示
-            .feed(lines: 2)
-        ])
-        
-        return Ticket(
-            chunks: chunks,
-            autoInitialize: true,
-            autoCut: true
-        )
+            Chunk.text("多谢惠顾，欢迎再次光临！", attributes: [TextAttribute.alignment(.center)])
+            Chunk.defaultLineSpacing
+            Chunk.buzzer(times: 2) // 蜂鸣 2 次提示
+            Chunk.feed(lines: 2)
+        }
     }
 
     // MARK: - 刷新小票模型与原生预览模式视图
