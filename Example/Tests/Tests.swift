@@ -415,4 +415,66 @@ class Tests: XCTestCase {
             XCTFail("JSON 解析失败: \(error)")
         }
     }
+    
+    // MARK: - 生成 README 截图素材
+    func testGenerateScreenshots() {
+        let ticket58 = LinePrinter.ticket(
+            autoCut: true,
+            .text("味美餐饮旗舰店", bold: true, alignment: .center),
+            .text("-- 欢迎光临 --", attributes: [TextAttribute.alignment(.center)]),
+            .splitter,
+            .text("单号: NO.20260907001"),
+            .text("时间: 2026-09-07 12:30:00"),
+            .text("收银员: 01号"),
+            .splitter,
+            .threeColumn("品名", "数量", "金额"),
+            .splitter(char: "-"),
+            .threeColumn("招牌老坛酸菜黑鱼饭(大份)", "x1", "38.00", wrap: true),
+            .threeColumn("秘制香辣鸭头", "x2", "16.00"),
+            .threeColumn("冰镇大麦若叶汁", "x1", "8.00"),
+            .splitter,
+            .twoColumn("原价合计", "￥62.00"),
+            .twoColumn("会员优惠券", "-￥12.00"),
+            .twoColumn("实付金额", "￥50.00"),
+            .splitter,
+            .text("支付方式: 微信支付"),
+            .text("【取餐号: A088】", bold: true, alignment: .center),
+            .splitter,
+            .text("扫码开具增值税电子发票", alignment: .center),
+            .qrcode("https://weixin.qq.com/r/example_invoice"),
+            .blank
+        )
+        
+        if let img58 = ticket58.previewImage(paperWidth: .mm58),
+           let data = UIImagePNGRepresentation(img58) {
+            let path = "/Users/xjx/Downloads/Mac backup/Code/DEV/LinePrinter/Screenshots/receipt_58mm.png"
+            try? data.write(to: URL(fileURLWithPath: path))
+        }
+        
+        let ticket80 = LinePrinter.ticket(
+            autoCut: true,
+            .text("精品生活大型商超购物小票", bold: true, alignment: .center),
+            .text("门店: 科技园旗舰总店", alignment: .center),
+            .splitter,
+            .threeColumn("商品名称/条码", "单价/数量", "金额", totalWidth: 48, wrap: true),
+            .splitter(char: "="),
+            .threeColumn("波士顿冷冻大龙虾 500g", "128.00 x 2", "256.00", totalWidth: 48, wrap: true),
+            .threeColumn("进口有机特级初榨橄榄油 1L", "88.00 x 1", "88.00", totalWidth: 48, wrap: true),
+            .threeColumn("日本青森红富士苹果礼盒", "59.90 x 1", "59.90", totalWidth: 48, wrap: true),
+            .splitter,
+            .twoColumn("商品总计", "￥403.90", totalWidth: 48),
+            .twoColumn("限时尊享折上折", "-￥53.90", totalWidth: 48),
+            .twoColumn("应收金额", "￥350.00", totalWidth: 48),
+            .splitter,
+            .barcode("6901234567890"),
+            .blank
+        )
+        
+        if let img80 = ticket80.previewImage(paperWidth: .mm80),
+           let data = UIImagePNGRepresentation(img80) {
+            let path = "/Users/xjx/Downloads/Mac backup/Code/DEV/LinePrinter/Screenshots/receipt_80mm.png"
+            try? data.write(to: URL(fileURLWithPath: path))
+        }
+    }
 }
+

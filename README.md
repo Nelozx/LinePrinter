@@ -12,6 +12,20 @@
 
 ---
 
+## 📸 效果演示 (Screenshots)
+
+<p align="center">
+  <img src="Screenshots/demo.png" width="280" alt="Demo App 交互演示" style="margin-right: 16px; border-radius: 8px;" />
+  <img src="Screenshots/receipt_58mm.png" width="260" alt="58mm 餐饮多列折行小票" style="margin-right: 16px; border-radius: 8px;" />
+  <img src="Screenshots/receipt_80mm.png" width="280" alt="80mm 超市购物小票" style="border-radius: 8px;" />
+</p>
+
+| **📱 真实物理出纸仿真与交互** | **🧾 58mm 餐饮多列智能折行小票** | **🏬 80mm 超市购物宽幅小票** |
+| :---: | :---: | :---: |
+| 仿打印机出纸口物理吐纸、触觉震动反馈 | 智能三列权重分配、超长菜品名自动折行 | 48 字符宽幅对齐、Code128 工业条码渲染 |
+
+---
+
 ## ✨ 核心特性
 
 - 🎯 **纯排版引擎与通信彻底解耦**：
