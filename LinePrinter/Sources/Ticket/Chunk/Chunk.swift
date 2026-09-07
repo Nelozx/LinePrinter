@@ -217,17 +217,17 @@ public extension Chunk {
     /// 支持指定总列宽及各列权重比例或固定宽度，精准控制每列文本居左/居中/居右对齐。
     /// - Parameters:
     ///   - totalWidth: 行总字符宽度，58mm 纸宽通常填 32，80mm 纸宽通常填 48，默认为 32
-    ///   - columns: 列配置数组（`LineColumn`）
+    ///   - columns: 列配置列表（`Line`）
     /// - Returns: 多列排版行块
     ///
     /// ```swift
     /// .row(totalWidth: 32,
-    ///      LineColumn("品名", weight: 2, alignment: .left),
-    ///      LineColumn("数量", weight: 1, alignment: .center),
-    ///      LineColumn("金额", weight: 1, alignment: .right))
+    ///      Line("品名", weight: 2, alignment: .left),
+    ///      Line("数量", weight: 1, alignment: .center),
+    ///      Line("金额", weight: 1, alignment: .right))
     /// ```
-    static func row(totalWidth: Int = 32, _ columns: LineColumn...) -> Self {
-        Chunk(Line(totalWidth: totalWidth, columns: columns))
+    static func row(totalWidth: Int = 32, _ columns: Line...) -> Self {
+        Chunk(Row(totalWidth: totalWidth, columns: columns))
     }
     
     /// 快速双列左右两端对齐排版
@@ -244,9 +244,9 @@ public extension Chunk {
     /// .twoColumn("实付金额", "￥40.00")
     /// ```
     static func twoColumn(_ left: String, _ right: String, totalWidth: Int = 32, wrap: Bool = false) -> Self {
-        Chunk(Line(totalWidth: totalWidth,
-                   LineColumn(left, weight: 1, alignment: .left, wrap: wrap),
-                   LineColumn(right, weight: 1, alignment: .right)))
+        Chunk(Row(totalWidth: totalWidth,
+                  Line(left, weight: 1, alignment: .left, wrap: wrap),
+                  Line(right, weight: 1, alignment: .right)))
     }
     
     /// 快速三列排版（左品名，中数量，右金额）
@@ -264,10 +264,10 @@ public extension Chunk {
     /// .threeColumn("招牌老坛酸菜黑鱼饭(大份)", "x1", "38.00", wrap: true)
     /// ```
     static func threeColumn(_ col1: String, _ col2: String, _ col3: String, totalWidth: Int = 32, wrap: Bool = false) -> Self {
-        Chunk(Line(totalWidth: totalWidth,
-                   LineColumn(col1, weight: 2, alignment: .left, wrap: wrap),
-                   LineColumn(col2, weight: 1, alignment: .center),
-                   LineColumn(col3, weight: 1, alignment: .right)))
+        Chunk(Row(totalWidth: totalWidth,
+                  Line(col1, weight: 2, alignment: .left, wrap: wrap),
+                  Line(col2, weight: 1, alignment: .center),
+                  Line(col3, weight: 1, alignment: .right)))
     }
     
     /// 垂直块分组容器

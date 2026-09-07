@@ -209,8 +209,8 @@ public class ReceiptPreviewView: UIView {
             if let text = provider as? Text {
                 let label = makeLabel(from: text)
                 stack.addArrangedSubview(label)
-            } else if let line = provider as? Line {
-                let lineView = makeMultiColumnView(from: line)
+            } else if let row = provider as? Row {
+                let lineView = makeMultiColumnView(from: row)
                 stack.addArrangedSubview(lineView)
             } else if let splitter = provider as? Splitter {
                 let splitterView = makeSplitterView(from: splitter)
@@ -295,7 +295,7 @@ public class ReceiptPreviewView: UIView {
         return label
     }
     
-    private func makeMultiColumnView(from line: Line) -> UIView {
+    private func makeMultiColumnView(from row: Row) -> UIView {
         let rowStack = UIStackView()
         rowStack.axis = .horizontal
         rowStack.spacing = 6
@@ -303,7 +303,7 @@ public class ReceiptPreviewView: UIView {
         rowStack.alignment = .top
         rowStack.translatesAutoresizingMaskIntoConstraints = false
         
-        for col in line.columns {
+        for col in row.columns {
             let label = UILabel()
             label.text = col.text
             label.textColor = UIColor(white: 0.15, alpha: 1.0)
@@ -324,16 +324,16 @@ public class ReceiptPreviewView: UIView {
             rowStack.addArrangedSubview(label)
             
             // 设置权重比例
-            if line.columns.count > 1 {
+            if row.columns.count > 1 {
                 label.tag = col.weight
             }
         }
         
         // 动态配置等比例宽度
-        let totalWeight = CGFloat(line.columns.reduce(0) { $0 + $1.weight })
+        let totalWeight = CGFloat(row.columns.reduce(0) { $0 + $1.weight })
         if totalWeight > 0 {
             for (idx, subview) in rowStack.arrangedSubviews.enumerated() {
-                let colWeight = CGFloat(line.columns[idx].weight)
+                let colWeight = CGFloat(row.columns[idx].weight)
                 let multiplier = colWeight / totalWeight
                 // 约束各列宽度
                 let widthConstraint = subview.widthAnchor.constraint(equalTo: rowStack.widthAnchor, multiplier: multiplier, constant: -6)

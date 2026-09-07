@@ -67,10 +67,10 @@ class Tests: XCTestCase {
     // MARK: - 多列排版测试
     func testMultiColumnLine() {
         // 测试双列对齐 (总宽 32: 左对齐品名，右对齐金额)
-        let twoCol = Line(
+        let twoCol = Row(
             totalWidth: 32,
-            LineColumn("红烧牛肉面", weight: 1, alignment: .left),
-            LineColumn("￥38.00", weight: 1, alignment: .right)
+            Line("红烧牛肉面", weight: 1, alignment: .left),
+            Line("￥38.00", weight: 1, alignment: .right)
         )
         let data = twoCol.data(using: .utf8)
         let lineString = String(data: data, encoding: .utf8)!
@@ -80,11 +80,11 @@ class Tests: XCTestCase {
         XCTAssertTrue(lineString.hasSuffix("￥38.00"))
         
         // 测试三列对齐 (总宽 32: 左边品名，中间数量，右边小计)
-        let threeCol = Line(
+        let threeCol = Row(
             totalWidth: 32,
-            LineColumn("可口可乐", weight: 2, alignment: .left),
-            LineColumn("x2", weight: 1, alignment: .center),
-            LineColumn("10.00", weight: 1, alignment: .right)
+            Line("可口可乐", weight: 2, alignment: .left),
+            Line("x2", weight: 1, alignment: .center),
+            Line("10.00", weight: 1, alignment: .right)
         )
         let threeData = threeCol.data(using: .utf8)
         let threeString = String(data: threeData, encoding: .utf8)!
@@ -182,11 +182,11 @@ class Tests: XCTestCase {
     func testMultiLineWrap() {
         // 模拟一个品名特别长、需要折行的三列小票
         let longName = "老坛酸菜无骨鱼饭超大份双拼" // 26 显示宽度
-        let line = Line(
+        let line = Row(
             totalWidth: 32,
-            LineColumn(longName, weight: 2, alignment: .left, wrap: true),
-            LineColumn("x1", weight: 1, alignment: .center),
-            LineColumn("38.00", weight: 1, alignment: .right)
+            Line(longName, weight: 2, alignment: .left, wrap: true),
+            Line("x1", weight: 1, alignment: .center),
+            Line("38.00", weight: 1, alignment: .right)
         )
         let data = line.data(using: .utf8)
         let output = String(data: data, encoding: .utf8)!

@@ -76,11 +76,11 @@ class ViewController: UIViewController {
             .text("时间：2026-09-07 12:30:00"),
             .text("收银员：01号"),
             .splitter(char: "-", printDensity: printDensity),
-            // 4. 三列明细表头
+            // 3. 三列明细表头
             .row(totalWidth: totalWidth,
-                 LineColumn("品名", weight: 2, alignment: .left),
-                 LineColumn("数量", weight: 1, alignment: .center),
-                 LineColumn("金额", weight: 1, alignment: .right)),
+                 Line("品名", weight: 2, alignment: .left),
+                 Line("数量", weight: 1, alignment: .center),
+                 Line("金额", weight: 1, alignment: .right)),
             .splitter(char: "-", printDensity: printDensity),
             // 5. 菜品列表（开启智能折行 wrap: true）
             .threeColumn("招牌老坛酸菜无骨黑鱼饭(大份)", "x1", "38.00", totalWidth: totalWidth, wrap: true),

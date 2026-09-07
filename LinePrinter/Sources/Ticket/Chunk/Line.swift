@@ -13,12 +13,12 @@ import Foundation
 ///
 /// ```swift
 /// // 品名列：占 2 权重，靠左对齐，开启超长自动折行
-/// LineColumn("招牌老坛酸菜黑鱼饭(超大份)", weight: 2, alignment: .left, wrap: true)
+/// Line("招牌老坛酸菜黑鱼饭(超大份)", weight: 2, alignment: .left, wrap: true)
 ///
 /// // 金额列：固定或自适应宽度，靠右对齐
-/// LineColumn("38.00", weight: 1, alignment: .right)
+/// Line("38.00", weight: 1, alignment: .right)
 /// ```
-public struct LineColumn {
+public struct Line {
     /// 该列显示的文本内容
     public let text: String
     
@@ -50,22 +50,26 @@ public struct LineColumn {
     }
 }
 
+/// 单列别名（兼容与直觉语义）
+public typealias LineColumn = Line
+public typealias Column = Line
+
 /// 多列排版行组件
 ///
 /// 精确测算中英文显示宽度，支持自适应权重分配，完美保持小票各列竖向垂直对齐。
-public struct Line: ChunkProvider {
+public struct Row: ChunkProvider {
     
     /// 整行总字符宽度（58mm 纸宽通常为 32，80mm 纸宽通常为 48，默认为 32）
     public var totalWidth: Int
     
     /// 包含的列配置列表
-    public private(set) var columns: [LineColumn]
+    public private(set) var columns: [Line]
     
     /// 初始化多列排版行（数组形式）
     /// - Parameters:
     ///   - totalWidth: 行总宽度，默认 32
     ///   - columns: 列配置数组
-    public init(totalWidth: Int = 32, columns: [LineColumn]) {
+    public init(totalWidth: Int = 32, columns: [Line]) {
         self.totalWidth = totalWidth
         self.columns = columns
     }
@@ -74,7 +78,7 @@ public struct Line: ChunkProvider {
     /// - Parameters:
     ///   - totalWidth: 行总宽度，默认 32
     ///   - columns: 变长列配置
-    public init(totalWidth: Int = 32, _ columns: LineColumn...) {
+    public init(totalWidth: Int = 32, _ columns: Line...) {
         self.totalWidth = totalWidth
         self.columns = columns
     }
@@ -226,3 +230,5 @@ public struct Line: ChunkProvider {
         }
     }
 }
+
+public typealias LineRow = Row
