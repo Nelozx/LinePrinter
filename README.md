@@ -71,119 +71,86 @@ pod 'LinePrinter', :git => 'https://github.com/Nelozx/LinePrinter.git'
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Core Layout & Output Paradigms
 
-### 1. Build a Receipt Declaratively (SwiftUI-Style Result Builder)
+LinePrinter values extreme simplicity and performance, retaining exclusively **2 clean layout paradigms**:
+
+### Paradigm 1: Variadic Chaining Output (Build & Send Instantly)
+
+No boilerplate array wrappers, elements separated cleanly by commas, directly chained into your transport pipeline:
 
 ```swift
 import LinePrinter
 
-let ticket = Ticket(autoCut: true) {
-    // 1. Header (Bold & Centered)
-    Chunk.text("Gourmet Restaurant Flagship", bold: true, alignment: .center)
-    Chunk.text("-- Welcome --", attributes: [TextAttribute.alignment(.center)])
-    Chunk.splitter
-    
-    // 2. Order Metadata
-    Chunk.text("Order No: NO.20260907001")
-    Chunk.text("Time: 2026-09-07 12:30:00")
-    Chunk.splitter
-    
-    // 3. Multi-Column Header
-    Chunk.row(totalWidth: 32,
-              LineColumn("Item", weight: 2, alignment: .left),
-              LineColumn("Qty", weight: 1, alignment: .center),
-              LineColumn("Amount", weight: 1, alignment: .right))
-    Chunk.splitter(char: "-")
-    
-    // 4. Line Items (Native for-in loops and auto-wrapping)
-    for item in orderItems {
-        Chunk.threeColumn(item.name, "x\(item.qty)", item.price, wrap: true)
-    }
-    Chunk.splitter
-    
-    // 5. Total & Discounts (Native if-condition support)
-    Chunk.twoColumn("Subtotal", "$49.00")
-    if hasCoupon {
-        Chunk.twoColumn("VIP Discount", "-$9.00")
-    }
-    Chunk.twoColumn("Total Paid", "$40.00")
-    Chunk.splitter
-    
-    // 6. QR Code & Barcode
-    Chunk.text("Scan for e-Invoice", attributes: [TextAttribute.alignment(.center)])
-    Chunk.qrcode("https://weixin.qq.com/r/example_invoice")
-    Chunk.barcode("20260907001", type: .code128)
-    
-    // 7. Footer & Paper Feed
-    Chunk.text("Thank you for your visit!", attributes: [TextAttribute.alignment(.center)])
-    Chunk.feed(lines: 4)
-}
-
-// Alternatively, use lightweight variadic parameters (no brackets):
-let quickTicket = LinePrinter.ticket(
-    .text("Quick Checkout", bold: true, alignment: .center),
+// 1. Variadic Chaining Direct Dispatch (Build & send directly to Bluetooth / Network / POS)
+LinePrinter.ticket(
+    .text("Quick Checkout Receipt", bold: true, alignment: .center),
     .splitter,
-    .twoColumn("Total", "$25.00"),
-    .qrcode("https://...")
-)
+    .row(totalWidth: 32,
+         LineColumn("Item", weight: 2, alignment: .left),
+         LineColumn("Qty", weight: 1, alignment: .center),
+         LineColumn("Price", weight: 1, alignment: .right)),
+    .splitter(char: "-"),
+    .threeColumn("Signature Sauerkraut Fish", "x1", "38.00", wrap: true),
+    .threeColumn("Iced Barley Grass Juice", "x2", "16.00", wrap: true),
+    .splitter,
+    .twoColumn("Total Paid", "$54.00"),
+    .qrcode("https://weixin.qq.com/r/example_invoice"),
+    .cut
+).print(to: bluetoothTransport)
+
+// 2. Or retrieve raw ESC/POS continuous binary stream Data
+let data = LinePrinter.ticket(
+    .text("Order: NO.20260907001"),
+    .twoColumn("Total Paid", "$20.00"),
+    .cut
+).bytes(using: .gbk)
+
+// Freely transmit via your CoreBluetooth peripheral or TCP Socket:
+myPeripheral.writeValue(data, for: myCharacteristic, type: .withoutResponse)
 ```
 
 ---
 
-### 2. Dispatch Binary Data (Completely Decoupled)
+### Paradigm 2: Server-Driven Dynamic JSON Layout (Over-The-Air Update)
 
-#### Approach A: Direct Raw Binary Stream (`Data`) (Recommended)
+Allow your cloud backend or microservices to dynamically push JSON templates directly to the iOS app:
 
 ```swift
-// 1. Generate standard ESC/POS continuous binary data
-let data: Data = ticket.bytes(using: .gbk)
+// 1. Construct Ticket from server JSON string
+let jsonString = """
+{
+  "autoInitialize": true,
+  "autoCut": true,
+  "chunks": [
+    { "type": "text", "text": "Cloud Dynamic Receipt", "bold": true, "alignment": "center" },
+    { "type": "splitter" },
+    { "type": "twoColumn", "left": "Total Paid", "right": "$98.00" },
+    { "type": "qrcode", "content": "https://lineprinter.dev" },
+    { "type": "cut" }
+  ]
+}
+"""
 
-// 2. Transmit via your app's existing pipeline:
+let ticket = try Ticket(jsonString: jsonString)
 
-// Scenario 1: Write to connected CoreBluetooth peripheral
-myPeripheral.writeValue(data, for: myCharacteristic, type: .withoutResponse)
-
-// Scenario 2: Write to your local TCP Socket
-myTcpSocket.write(data)
-
-// Scenario 3: Forward to commercial POS hardware SDKs (Sunmi / Landi / Newland)
-SunmiPrinterService.shared.sendRAWData(data)
+// 2. Dispatch with one line
+ticket.print(to: bluetoothTransport)
 ```
 
-#### Approach B: Via `PrinterTransport` (Chain-and-Send / Build-and-Print)
+---
 
-Conform your communication manager to `PrinterTransport`:
+### 3. Decoupled Transport Protocol `PrinterTransport`
+
+Simply conform your Bluetooth manager, TCP Socket, or hardware service to `PrinterTransport`:
 
 ```swift
-class MyBluetoothManager: PrinterTransport {
+class MyBluetoothTransport: PrinterTransport {
     func write(_ data: Data) {
-        currentPeripheral?.writeValue(data, for: writeChar, type: .withoutResponse)
+        // Handle MTU chunking or characteristic write
+        peripheral.writeValue(data, for: characteristic, type: .withoutResponse)
     }
 }
-
-let bluetooth = MyBluetoothManager()
-
-// Syntax 1: Variadic parameters (Build & dispatch in 1 line without temporary variables)
-LinePrinter.print(to: bluetooth, autoCut: true,
-    .text("Quick Checkout", bold: true, alignment: .center),
-    .splitter,
-    .twoColumn("Total Paid", "$30.00"),
-    .qrcode("https://...")
-)
-
-// Syntax 2: ResultBuilder closure (SwiftUI-like declarative syntax with native loops)
-LinePrinter.print(to: bluetooth, autoCut: true) {
-    Chunk.text("Gourmet Restaurant", bold: true, alignment: .center)
-    for item in orderItems {
-        Chunk.threeColumn(item.name, "x\(item.qty)", item.price)
-    }
-    Chunk.twoColumn("Total Paid", "$50.00")
-    Chunk.qrcode("https://...")
-}
-
-// Syntax 3: Fluent chaining on existing Ticket
-ticket.print(to: bluetooth)
 ```
 
 ---

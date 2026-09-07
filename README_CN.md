@@ -71,120 +71,86 @@ pod 'LinePrinter', :git => 'https://github.com/Nelozx/LinePrinter.git'
 
 ---
 
-## 🚀 快速上手
+## 🚀 核心排版与直出方式
 
-### 1. 声明式构建一张小票 (SwiftUI 风格 Result Builder)
+LinePrinter 崇尚极致的简洁与高效，去除了所有冗余复杂的抽象，仅保留最纯正的 **2 种排版构建方式**：
+
+### 方式 1：变长参数链式直出（代码构建即发送）
+
+无需繁琐数组包装，逗号自由隔开排版块，一气呵成直接输出到传输通道或硬件：
 
 ```swift
 import LinePrinter
 
-let ticket = Ticket(autoCut: true) {
-    // 1. 店铺标题 (加粗居中)
-    Chunk.text("味美餐饮旗舰店", bold: true, alignment: .center)
-    Chunk.text("-- 欢迎光临 --", attributes: [TextAttribute.alignment(.center)])
-    Chunk.splitter
-    
-    // 2. 基础单号信息
-    Chunk.text("单号：NO.20260907001")
-    Chunk.text("时间：2026-09-07 12:30:00")
-    Chunk.splitter
-    
-    // 3. 多列表头 (品名 2 权重、数量 1 权重、金额 1 权重)
-    Chunk.row(totalWidth: 32,
-              LineColumn("品名", weight: 2, alignment: .left),
-              LineColumn("数量", weight: 1, alignment: .center),
-              LineColumn("金额", weight: 1, alignment: .right))
-    Chunk.splitter(char: "-")
-    
-    // 4. 明细 (原生支持 for-in 循环，支持超长菜名智能折行 wrap: true)
-    for item in orderItems {
-        Chunk.threeColumn(item.name, "x\(item.quantity)", item.price, wrap: true)
-    }
-    Chunk.splitter
-    
-    // 5. 汇总金额 (原生支持 if 条件控制)
-    Chunk.twoColumn("原价合计", "￥49.00")
-    if hasCoupon {
-        Chunk.twoColumn("会员优惠", "-￥9.00")
-    }
-    Chunk.twoColumn("实付金额", "￥40.00")
-    Chunk.splitter
-    
-    // 6. 二维码与条形码
-    Chunk.text("扫码开具电子发票", attributes: [TextAttribute.alignment(.center)])
-    Chunk.qrcode("https://weixin.qq.com/r/example_invoice")
-    Chunk.barcode("20260907001", type: .code128)
-    
-    // 7. 尾部提示与走纸
-    Chunk.text("多谢惠顾，欢迎再次光临！", attributes: [TextAttribute.alignment(.center)])
-    Chunk.feed(lines: 4)
-}
-
-// 亦可使用超简变长参数形式（无中括号，逗号隔开）：
-let quickTicket = LinePrinter.ticket(
-    .text("快速收银单", bold: true, alignment: .center),
+// 1. 链式通道直出（构建即发送到蓝牙/WiFi/硬件）
+LinePrinter.ticket(
+    .text("快速结账单", bold: true, alignment: .center),
     .splitter,
-    .twoColumn("实付金额", "￥25.00"),
-    .qrcode("https://...")
-)
+    .row(totalWidth: 32,
+         LineColumn("品名", weight: 2, alignment: .left),
+         LineColumn("数量", weight: 1, alignment: .center),
+         LineColumn("金额", weight: 1, alignment: .right)),
+    .splitter(char: "-"),
+    .threeColumn("招牌老坛酸菜鱼", "x1", "38.00", wrap: true),
+    .threeColumn("冰镇大麦若叶汁", "x2", "16.00", wrap: true),
+    .splitter,
+    .twoColumn("应收总计", "￥54.00"),
+    .qrcode("https://weixin.qq.com/r/example_invoice"),
+    .cut
+).print(to: bluetoothTransport)
+
+// 2. 亦可获取标准 ESC/POS 连续二进制字节流 Data 自行下发
+let data = LinePrinter.ticket(
+    .text("单号：NO.20260907001"),
+    .twoColumn("实付金额", "￥20.00"),
+    .cut
+).bytes(using: .gbk)
+
+// 自由下发给你的蓝牙外设或网络 Socket：
+myPeripheral.writeValue(data, for: myCharacteristic, type: .withoutResponse)
 ```
 
 ---
 
-### 2. 输出小票数据（完全由外部自由发送）
+### 方式 2：服务端动态驱动 JSON 排版（热更新免发版）
 
-#### 方式 A：直接获取纯连续二进制流（推荐）
+支持云端或后端微服务直接下发标准 JSON 模板，App 本地直接渲染成小票：
 
 ```swift
-// 1. 生成标准的 ESC/POS 连续二进制数据
-let data: Data = ticket.bytes(using: .gbk)
+// 1. 从服务端下发的 JSON 字符串构建小票
+let jsonString = """
+{
+  "autoInitialize": true,
+  "autoCut": true,
+  "chunks": [
+    { "type": "text", "text": "云端动态结账单", "bold": true, "alignment": "center" },
+    { "type": "splitter" },
+    { "type": "twoColumn", "left": "应收金额", "right": "￥98.00" },
+    { "type": "qrcode", "content": "https://lineprinter.dev" },
+    { "type": "cut" }
+  ]
+}
+"""
 
-// 2. 外部自由下发（按你自己项目的现有连接方式发送）：
+let ticket = try Ticket(jsonString: jsonString)
 
-// 场景 1：写入你已连接的低功耗蓝牙外设
-myPeripheral.writeValue(data, for: myCharacteristic, type: .withoutResponse)
-
-// 场景 2：写入你自己的局域网 TCP Socket
-myTcpSocket.write(data)
-
-// 场景 3：直接传给商米 / 联迪 / 新大陆等一体机硬件 SDK
-SunmiPrinterService.shared.sendRAWData(data)
+// 2. 一行代码直接发送打印
+ticket.print(to: bluetoothTransport)
 ```
 
-#### 方式 B：通过通道协议 `PrinterTransport`（链式直出 / 构建即发送）
+---
 
-让你的通信管理类遵循 `PrinterTransport` 协议：
+### 3. 解耦传输通道协议 `PrinterTransport`
+
+只需让你的蓝牙、TCP Socket 或硬件服务类遵循 `PrinterTransport`，即可无缝支持 `.print(to:)`：
 
 ```swift
-class MyBluetoothManager: PrinterTransport {
+class MyBluetoothTransport: PrinterTransport {
     func write(_ data: Data) {
-        // 在此执行分包发送或直接写入外设特征值
-        currentPeripheral?.writeValue(data, for: writeChar, type: .withoutResponse)
+        // 在此执行分包发送或写入外设特征值
+        peripheral.writeValue(data, for: characteristic, type: .withoutResponse)
     }
 }
-
-let bluetooth = MyBluetoothManager()
-
-// 语法 1：变长参数构建即发送（一行直出，无需临时变量）
-LinePrinter.print(to: bluetooth, autoCut: true,
-    .text("快速收银小票", bold: true, alignment: .center),
-    .splitter,
-    .twoColumn("实付金额", "￥30.00"),
-    .qrcode("https://...")
-)
-
-// 语法 2：ResultBuilder 闭包构建即发送（支持 if/for，手感如 SwiftUI）
-LinePrinter.print(to: bluetooth, autoCut: true) {
-    Chunk.text("味美餐饮店", bold: true, alignment: .center)
-    for item in orderItems {
-        Chunk.threeColumn(item.name, "x\(item.quantity)", item.price)
-    }
-    Chunk.twoColumn("实付金额", "￥50.00")
-    Chunk.qrcode("https://...")
-}
-
-// 语法 3：现有 Ticket 对象链式发送
-ticket.print(to: bluetooth)
 ```
 
 ---

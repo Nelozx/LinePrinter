@@ -57,28 +57,6 @@ public struct Ticket {
         self.autoCut = autoCut
     }
     
-    /// 使用声明式 DSL 构建小票（SwiftUI 风格，无需方括号与逗号，原生支持 if / for 循环）
-    /// - Parameters:
-    ///   - autoInitialize: 是否在头部自动初始化，默认 `true`
-    ///   - autoCut: 是否在末尾自动切纸，默认 `false`
-    ///   - builder: 排版构建闭包
-    ///
-    /// ```swift
-    /// let ticket = Ticket(autoCut: true) {
-    ///     Chunk.text("味美餐饮店", bold: true, alignment: .center)
-    ///     Chunk.splitter
-    ///     for item in items {
-    ///         Chunk.threeColumn(item.name, item.qty, item.price)
-    ///     }
-    ///     Chunk.qrcode("https://...")
-    /// }
-    /// ```
-    public init(autoInitialize: Bool = true, autoCut: Bool = false, @TicketBuilder builder: () -> [Chunk]) {
-        self.chunks = builder()
-        self.autoInitialize = autoInitialize
-        self.autoCut = autoCut
-    }
-    
     /// 向小票末尾追加单个排版块
     /// - Parameter chunk: 要追加的排版块
     public mutating func append(_ chunk: Chunk) {

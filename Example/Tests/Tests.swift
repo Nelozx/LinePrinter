@@ -1,6 +1,13 @@
 import XCTest
 @testable import LinePrinter
 
+final class MockCustomTransport: PrinterTransport {
+    var receivedData = Data()
+    func write(_ data: Data) {
+        receivedData.append(data)
+    }
+}
+
 class Tests: XCTestCase {
     
     override func setUp() {
@@ -215,34 +222,20 @@ class Tests: XCTestCase {
     
     // MARK: - 极简解耦测试: 链式通道直出（构建即发送）
     func testCustomTransportDecoupling() {
-        class MockCustomTransport: PrinterTransport {
-            var receivedData = Data()
-            func write(_ data: Data) {
-                receivedData.append(data)
-            }
-        }
-        
         let mock = MockCustomTransport()
         
-        // 1. 链式调用返回自身
+        // 1. Ticket print 链式调用返回自身
         let ticket = Ticket(chunks: [.text("自定义通道测试")]).print(to: mock, encoding: .gbk)
         XCTAssertFalse(mock.receivedData.isEmpty)
         XCTAssertEqual(ticket.chunks.count, 1)
         
-        // 2. 门面变长参数直出 (构建即发送)
+        // 2. LinePrinter.ticket 变长参数构建并直出打印
         mock.receivedData = Data()
-        LinePrinter.print(to: mock, autoCut: true,
-            .text("快速收银"),
-            .twoColumn("实付", "￥20.00")
-        )
-        XCTAssertFalse(mock.receivedData.isEmpty)
-        
-        // 3. 门面 ResultBuilder 闭包直出 (构建即发送)
-        mock.receivedData = Data()
-        LinePrinter.print(to: mock, autoCut: true) {
-            Chunk.text("美味餐厅")
-            Chunk.twoColumn("合计", "￥50.00")
-        }
+        LinePrinter.ticket(
+            .text("快速结账单", bold: true, alignment: .center),
+            .twoColumn("应收", "￥20.00"),
+            .cut
+        ).print(to: mock)
         XCTAssertFalse(mock.receivedData.isEmpty)
     }
     
@@ -272,7 +265,7 @@ class Tests: XCTestCase {
         XCTAssertTrue(status.contains(.paperEmpty))
         
         // 4. LinePrinter 统一门面与命名空间验证
-        XCTAssertEqual(LinePrinter.version, "0.2.0")
+        XCTAssertEqual(LinePrinter.version, "0.3.0")
         let facadeTicket = LinePrinter.ticket(
             .text("门面小票标题", bold: true, alignment: .center),
             .qrcode("https://lineprinter.dev")
@@ -491,59 +484,18 @@ class Tests: XCTestCase {
         XCTAssertGreaterThan(img80?.size.height ?? 0, 0)
     }
     
-    // MARK: - ResultBuilder 优雅声明式 DSL 测试
-    func testTicketResultBuilder() {
-        let hasCoupon = true
-        let items = [("招牌酸菜鱼", "x1", "38.00"), ("冰镇可乐", "x2", "6.00")]
+    // MARK: - LinePrinter.ticket 变长链式直出与 JSON 测试
+    func testLinePrinterTicketChainingPrint() {
+        let mock = MockCustomTransport()
         
-        let ticket = Ticket(autoCut: true) {
-            Chunk.text("美味餐厅", bold: true, alignment: .center)
-            Chunk.splitter
-            
-            for item in items {
-                Chunk.threeColumn(item.0, item.1, item.2, wrap: true)
-            }
-            
-            if hasCoupon {
-                Chunk.twoColumn("优惠券抵扣", "-￥10.00")
-            }
-            
-            Chunk.splitter
-            Chunk.twoColumn("实付总计", "￥34.00")
-            Chunk.qrcode("https://weixin.qq.com")
-        }
+        let ticket = LinePrinter.ticket(
+            .text("快速结账单", bold: true, alignment: .center),
+            .twoColumn("应收", "￥20.00"),
+            .cut
+        ).print(to: mock)
         
-        XCTAssertTrue(ticket.autoCut)
-        // 验证块数量: 1(text) + 1(splitter) + 2(items) + 1(coupon) + 1(splitter) + 1(total) + 1(qr) = 8
-        XCTAssertEqual(ticket.chunks.count, 8)
-        
-        let data = ticket.bytes(using: .utf8)
-        XCTAssertFalse(data.isEmpty)
-    }
-    
-    // MARK: - Fluent Chaining 纯链式调用测试
-    func testTicketFluentChaining() {
-        let hasCoupon = true
-        let items = [("招牌酸菜鱼", "x1", "38.00"), ("冰镇可乐", "x2", "6.00")]
-        
-        let ticket = Ticket.make(autoInitialize: true, autoCut: true)
-            .text("美味餐厅", bold: true, alignment: .center)
-            .splitter()
-            .forEach(items) { t, item in
-                t.threeColumn(item.0, item.1, item.2, wrap: true)
-            }
-            .when(hasCoupon) { $0.twoColumn("优惠券抵扣", "-￥10.00") }
-            .splitter()
-            .twoColumn("实付总计", "￥34.00")
-            .qrcode("https://weixin.qq.com")
-            .cut()
-        
-        XCTAssertTrue(ticket.autoInitialize)
-        XCTAssertTrue(ticket.autoCut)
-        XCTAssertEqual(ticket.chunks.count, 9) // 包含最后的 .cut
-        
-        let bytes = ticket.bytes(using: .utf8)
-        XCTAssertFalse(bytes.isEmpty)
+        XCTAssertEqual(ticket.chunks.count, 3)
+        XCTAssertFalse(mock.receivedData.isEmpty)
     }
 }
 

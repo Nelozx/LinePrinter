@@ -61,48 +61,57 @@ class ViewController: UIViewController {
         let logoImage = UIImage(named: "good") ?? makeDemoLogoImage()
         let printDensity = totalWidth == 32 ? 384 : 576
         
-        return Ticket.make(autoInitialize: true, autoCut: true)
-            // 1. 顶部蜂鸣器与行间距优化
+        var chunks: [Chunk] = [
+            // 1. 顶部行间距与蜂鸣器设置
             .lineSpacing(22)
-            // 2. 顶部 Logo 图案 (单色位图抖动打印)
-            .whenLet(logoImage) { $0.image($1, dither: .floydSteinberg) }
+        ]
+        
+        // 2. 顶部 Logo 图案 (单色位图抖动打印)
+        if let logo = logoImage {
+            chunks.append(.image(logo, dither: .floydSteinberg))
+        }
+        
+        chunks.append(contentsOf: [
             // 3. 店铺名与单号时间
-            .text("味美餐饮旗舰店", bold: true, alignment: .center)
-            .text("-- 欢迎光临 --", attributes: [TextAttribute.alignment(.center)])
-            .splitter(char: "-", printDensity: printDensity)
-            .text("单号：NO.20260907001")
-            .text("时间：2026-09-07 12:30:00")
-            .text("收银员：01号")
-            .splitter(char: "-", printDensity: printDensity)
+            .text("味美餐饮旗舰店", bold: true, alignment: .center),
+            .text("-- 欢迎光临 --", attributes: [TextAttribute.alignment(.center)]),
+            .splitter(char: "-", printDensity: printDensity),
+            .text("单号：NO.20260907001"),
+            .text("时间：2026-09-07 12:30:00"),
+            .text("收银员：01号"),
+            .splitter(char: "-", printDensity: printDensity),
             // 4. 三列明细表头
             .row(totalWidth: totalWidth,
                  LineColumn("品名", weight: 2, alignment: .left),
                  LineColumn("数量", weight: 1, alignment: .center),
-                 LineColumn("金额", weight: 1, alignment: .right))
-            .splitter(char: "-", printDensity: printDensity)
+                 LineColumn("金额", weight: 1, alignment: .right)),
+            .splitter(char: "-", printDensity: printDensity),
             // 5. 菜品列表（开启智能折行 wrap: true）
-            .threeColumn("招牌老坛酸菜无骨黑鱼饭(大份)", "x1", "38.00", totalWidth: totalWidth, wrap: true)
-            .threeColumn("秘制香辣鸭头", "x2", "16.00", totalWidth: totalWidth, wrap: true)
-            .threeColumn("冰镇大麦若叶汁", "x1", "8.00", totalWidth: totalWidth, wrap: true)
-            .splitter(char: "-", printDensity: printDensity)
+            .threeColumn("招牌老坛酸菜无骨黑鱼饭(大份)", "x1", "38.00", totalWidth: totalWidth, wrap: true),
+            .threeColumn("秘制香辣鸭头", "x2", "16.00", totalWidth: totalWidth, wrap: true),
+            .threeColumn("冰镇大麦若叶汁", "x1", "8.00", totalWidth: totalWidth, wrap: true),
+            .splitter(char: "-", printDensity: printDensity),
             // 6. 账单汇总
-            .twoColumn("原价合计", "￥62.00", totalWidth: totalWidth)
-            .twoColumn("会员优惠券", "-￥12.00", totalWidth: totalWidth)
-            .twoColumn("实付金额", "￥50.00", totalWidth: totalWidth)
-            .splitter(char: "=", printDensity: printDensity)
+            .twoColumn("原价合计", "￥62.00", totalWidth: totalWidth),
+            .twoColumn("会员优惠券", "-￥12.00", totalWidth: totalWidth),
+            .twoColumn("实付金额", "￥50.00", totalWidth: totalWidth),
+            .splitter(char: "=", printDensity: printDensity),
             // 7. 支付信息与加粗取餐号
-            .text("支付方式：微信支付")
-            .text("【取餐号：A088】", bold: true, alignment: .center)
-            .splitter(char: "-", printDensity: printDensity)
+            .text("支付方式：微信支付"),
+            .text("【取餐号：A088】", bold: true, alignment: .center),
+            .splitter(char: "-", printDensity: printDensity),
             // 8. 电子发票二维码与一维条码（带下方 HRI 数字）
-            .text("扫码开具增值税电子发票", attributes: [TextAttribute.alignment(.center)])
-            .qrcode("https://weixin.qq.com/r/lineprinter_demo")
-            .barcode("20260907001", type: .code128, height: 60, width: 2, hri: .below)
+            .text("扫码开具增值税电子发票", attributes: [TextAttribute.alignment(.center)]),
+            .qrcode("https://weixin.qq.com/r/lineprinter_demo"),
+            .barcode("20260907001", type: .code128, height: 60, width: 2, hri: .below),
             // 9. 结尾问候与出单提示
-            .text("多谢惠顾，欢迎再次光临！", attributes: [TextAttribute.alignment(.center)])
-            .defaultLineSpacing()
-            .buzzer(times: 2) // 蜂鸣 2 次提示
+            .text("多谢惠顾，欢迎再次光临！", attributes: [TextAttribute.alignment(.center)]),
+            .defaultLineSpacing,
+            .buzzer(times: 2),
             .feed(lines: 2)
+        ])
+        
+        return LinePrinter.ticket(chunks: chunks, autoInitialize: true, autoCut: true)
     }
 
     // MARK: - 刷新小票模型与原生预览模式视图
