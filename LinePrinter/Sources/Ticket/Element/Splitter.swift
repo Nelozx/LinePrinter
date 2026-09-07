@@ -11,7 +11,7 @@ import Foundation
 /// 分隔线/分割条打印元素
 ///
 /// 根据指定的打印纸宽度密度与单字符密度，自动重复填充字符生成横跨整行的小票分割线。
-public struct Splitter: ChunkProvider {
+public struct Splitter: Printable {
     
     let provider: SplitterProvider
     let printDensity: Int

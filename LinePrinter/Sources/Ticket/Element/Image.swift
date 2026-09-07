@@ -20,7 +20,7 @@ import AppKit
 /// 将图片转换为热敏打印机光栅位图（Raster Bit Image）指令（`GS v 0`）。
 ///
 /// 支持抖动算法优化（如 Floyd-Steinberg 误差扩散算法），让灰度渐变图片在仅支持黑白二值化的热敏纸上也能细腻呈现。
-public struct Image: ChunkProvider {
+public struct Image: Printable {
     
     /// 经过热敏点阵二值化抖动后的单色黑白图像（真实还原热敏打印效果，非彩色原图）
     public let cgImage: CGImage?

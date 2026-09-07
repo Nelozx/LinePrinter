@@ -8,7 +8,7 @@
 import Foundation
 
 /// 空白占位排版元素
-public struct Blank: ChunkProvider {
+public struct Blank: Printable {
     public init() {}
     public func data(using encoding: String.Encoding) -> Data {
         Data()

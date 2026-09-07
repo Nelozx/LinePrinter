@@ -53,7 +53,7 @@ public struct Line {
 /// 多列排版行组件
 ///
 /// 精确测算中英文显示宽度，支持自适应权重分配，完美保持小票各列竖向垂直对齐。
-public struct Row: ChunkProvider {
+public struct Row: Printable {
     
     /// 整行总字符宽度（58mm 纸宽通常为 32，80mm 纸宽通常为 48，默认为 32）
     public var totalWidth: Int

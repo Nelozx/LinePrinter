@@ -8,7 +8,7 @@
 import Foundation
 
 /// 二维码打印排版元素
-public struct QRCode: ChunkProvider {
+public struct QRCode: Printable {
     
     /// 二维码文本或链接内容
     public let content: String

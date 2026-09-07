@@ -8,7 +8,7 @@
 import Foundation
 
 /// 条形码打印排版元素
-public struct BarCode: ChunkProvider {
+public struct BarCode: Printable {
     
     /// 条码细线条宽度倍率（1~6）
     public let width: UInt8

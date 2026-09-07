@@ -226,9 +226,9 @@ public class ReceiptPreviewView: UIView {
                     let imgView = makeImageView(from: UIImage(cgImage: cg))
                     stack.addArrangedSubview(imgView)
                 }
-            } else if let raw = provider as? RawDataChunkProvider {
+            } else if let data = provider as? Data {
                 // 检查切纸指令 (0x1D, 0x56 即 GS V)
-                if raw.rawData.contains(0x56) && raw.rawData.contains(0x1D) {
+                if data.contains(0x56) && data.contains(0x1D) {
                     hasCutIndicator = true
                     stack.addArrangedSubview(makeCutIndicatorView())
                 }

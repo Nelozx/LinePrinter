@@ -76,7 +76,7 @@ public enum TextAttribute: Attribute {
 /// 基础文本排版元素
 ///
 /// 封装了文本内容与其附加的 ESC/POS 样式属性，并在打印完成后自动复位样式，防止样式污染下一行。
-public struct Text: ChunkProvider {
+public struct Text: Printable {
     
     /// 文本内容
     public let content: String

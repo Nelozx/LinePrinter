@@ -18,7 +18,7 @@ import Foundation
 ///     .feed(1)
 /// )
 /// ```
-public struct ChunkGroup: ChunkProvider {
+public struct ChunkGroup: Printable {
     
     /// 包含的子小票块列表
     public private(set) var elements: [Chunk] = []

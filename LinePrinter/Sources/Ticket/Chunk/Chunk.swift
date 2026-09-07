@@ -15,12 +15,15 @@ import UIKit
 import AppKit
 #endif
 
-/// 可输出小票二进制数据的协议
+/// 可输出小票 ESC/POS 二进制数据的协议
 public protocol Printable {
-    /// 将排版元素转换为指定编码的二进制数据
-    /// - Parameter encoding: 字符编码 (如 `.gbk`, `.utf8`)
-    /// - Returns: ESC/POS 指令二进制流
+    /// 转换为对应编码的 ESC/POS 二进制指令流
     func data(using encoding: String.Encoding) -> Data
+}
+
+/// 支持 Data 直接作为可打印排版项
+extension Data: Printable {
+    public func data(using encoding: String.Encoding) -> Data { self }
 }
 
 /// 文本修饰属性协议
@@ -29,27 +32,9 @@ public protocol Attribute {
     var attribute: [UInt8] { get }
 }
 
-/// 能够作为小票块内容载体的提供者协议
-public protocol ChunkProvider: Printable { }
-
-/// 原始二进制数据提供器（用于切纸、开钱箱、走纸等无需附加末尾走纸的指令块）
-public struct RawDataChunkProvider: ChunkProvider {
-    public let rawData: Data
-    
-    /// 初始化原始数据块提供者
-    /// - Parameter rawData: ESC/POS 原始指令数据
-    public init(_ rawData: Data) {
-        self.rawData = rawData
-    }
-    
-    public func data(using encoding: String.Encoding) -> Data {
-        rawData
-    }
-}
-
 /// 小票排版基本单元（块）
 ///
-/// 包含一个具体的内容提供者（如文本、图片、二维码等）以及打印后的走纸点数（feedPoints）。
+/// 包含一个具体的内容提供者（文本、图片、二维码、指令等）以及打印后的走纸点数（feedPoints）。
 public struct Chunk: Printable {
     /// 默认行间距走纸点数（70 点）
     public static var defaultFeedPoints: UInt8 = 70
@@ -58,13 +43,13 @@ public struct Chunk: Printable {
     public let feedPoints: UInt8
     
     /// 具体排版内容提供者
-    public let provider: ChunkProvider
+    public let provider: Printable
 
     /// 构造小票排版块
     /// - Parameters:
-    ///   - provider: 内容提供器（文本、条码、图片等）
+    ///   - provider: 内容提供器（文本、条码、图片、Data 等）
     ///   - feedPoints: 打印完成后的进纸点数，默认为 70 点，若为 0 则不自动走纸
-    public init(_ provider: ChunkProvider, feedPoints: UInt8 = Chunk.defaultFeedPoints) {
+    public init(_ provider: Printable, feedPoints: UInt8 = Chunk.defaultFeedPoints) {
         self.feedPoints = feedPoints
         self.provider = provider
     }
@@ -177,7 +162,7 @@ public extension Chunk {
     
     /// 空占位排版块（不打印任何内容，不走纸）
     static var empty: Self {
-        Chunk(RawDataChunkProvider(Data()), feedPoints: 0)
+        Chunk(Data(), feedPoints: 0)
     }
     
     #if canImport(UIKit)
@@ -283,28 +268,28 @@ public extension Chunk {
     ///
     /// 向打印机发送全切纸命令（GS V 48）。
     static var cut: Self {
-        Chunk(RawDataChunkProvider(Data.cut), feedPoints: 0)
+        Chunk(Data.cut, feedPoints: 0)
     }
     
     /// 半切纸指令块
     ///
     /// 向打印机发送半切纸命令（GS V 49），保留一小段连接点便于人工取票。
     static var partialCut: Self {
-        Chunk(RawDataChunkProvider(Data.partialCut), feedPoints: 0)
+        Chunk(Data.partialCut, feedPoints: 0)
     }
     
     /// 自动进纸并全切纸
     ///
     /// 先走纸数行（预留切刀与打印头安全距离），随后执行切纸。
     static var feedAndCut: Self {
-        Chunk(RawDataChunkProvider(Data.feedAndCut), feedPoints: 0)
+        Chunk(Data.feedAndCut, feedPoints: 0)
     }
     
     /// 弹出收银钱箱
     ///
     /// 向打印机输出钱箱引脚脉冲信号（ESC p 0 60 255）。
     static var openDrawer: Self {
-        Chunk(RawDataChunkProvider(Data.openDrawer), feedPoints: 0)
+        Chunk(Data.openDrawer, feedPoints: 0)
     }
     
     /// 走纸指定行数
@@ -316,7 +301,7 @@ public extension Chunk {
     /// .feed(lines: 3)
     /// ```
     static func feed(lines: UInt8 = 1) -> Self {
-        Chunk(RawDataChunkProvider(Data(escpos: .printAndFeed(lines: lines))), feedPoints: 0)
+        Chunk(Data(escpos: .printAndFeed(lines: lines)), feedPoints: 0)
     }
     
     /// 蜂鸣器发声提示块（后厨出单提醒、外卖催单）
@@ -329,7 +314,7 @@ public extension Chunk {
     /// .buzzer(times: 3)
     /// ```
     static func buzzer(times: UInt8 = 1, duration: UInt8 = 2) -> Self {
-        Chunk(RawDataChunkProvider(Data.buzzer(times: times, duration: duration)), feedPoints: 0)
+        Chunk(Data.buzzer(times: times, duration: duration), feedPoints: 0)
     }
     
     /// 设置自定义行间距（紧凑排版/节省纸张）
@@ -339,16 +324,16 @@ public extension Chunk {
     /// .lineSpacing(20) // 设置紧凑行距
     /// ```
     static func lineSpacing(_ points: UInt8) -> Self {
-        Chunk(RawDataChunkProvider(Data.lineSpacing(points)), feedPoints: 0)
+        Chunk(Data.lineSpacing(points), feedPoints: 0)
     }
     
     /// 恢复出厂默认行间距（约 30 点阵）
     static var defaultLineSpacing: Self {
-        Chunk(RawDataChunkProvider(Data.defaultLineSpacing), feedPoints: 0)
+        Chunk(Data.defaultLineSpacing, feedPoints: 0)
     }
     
     /// 进纸定位至黑标/标签缝隙（标签小票机专用）
     static var feedToBlackMark: Self {
-        Chunk(RawDataChunkProvider(Data.feedToBlackMark), feedPoints: 0)
+        Chunk(Data.feedToBlackMark, feedPoints: 0)
     }
 }
