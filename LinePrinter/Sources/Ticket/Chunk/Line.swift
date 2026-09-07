@@ -79,17 +79,6 @@ public struct Line: ChunkProvider {
         self.columns = columns
     }
     
-    public init(_ elements: [Chunk], totalWidth: Int = 32) {
-        self.totalWidth = totalWidth
-        self.columns = elements.enumerated().map { index, chunk in
-            let align: Commands.Alignment = (index == elements.count - 1 && elements.count > 1) ? .right : .left
-            if let textProvider = chunk.provider as? Text {
-                return LineColumn(textProvider.content, weight: 1, alignment: align)
-            }
-            return LineColumn("", weight: 1, alignment: align)
-        }
-    }
-    
     public func data(using encoding: String.Encoding) -> Data {
         guard !columns.isEmpty else { return Data() }
         

@@ -39,33 +39,6 @@ public enum LinePrinter {
     /// 框架版本号
     public static let version = "0.3.0"
     
-    /// 便捷构建小票对象（变长参数 DSL）
-    ///
-    /// - Parameters:
-    ///   - autoInitialize: 是否在小票头部自动添加 ESC/POS 初始化指令（`ESC @`），默认为 `true`
-    ///   - autoCut: 是否在小票结尾自动走纸并切纸，默认为 `false`
-    ///   - chunks: 排版块列表（如 `.text`, `.splitter`, `.row`, `.qrcode` 等）
-    /// - Returns: 构建完成的 `Ticket` 小票对象
-    ///
-    /// ```swift
-    /// let ticket = LinePrinter.ticket(
-    ///     .text("欢迎光临", bold: true, alignment: .center),
-    ///     .splitter,
-    ///     .text("单号: NO.1001")
-    /// 便捷构建小票对象（变长参数 DSL，支持链式 .print(to:)）
-    ///
-    /// - Parameters:
-    ///   - autoInitialize: 是否在小票头部自动添加 ESC/POS 初始化指令（`ESC @`），默认为 `true`
-    ///   - autoCut: 是否在小票结尾自动走纸并切纸，默认为 `false`
-    ///   - chunks: 排版块列表（如 `.text`, `.splitter`, `.twoColumn`, `.qrcode` 等）
-    /// - Returns: 构建完成的 `Ticket` 小票对象（可链式调用 .print(to:)、.previewImage() 等）
-    ///
-    /// ```swift
-    /// LinePrinter.ticket(
-    ///     .text("快速结账单", bold: true, alignment: .center),
-    ///     .twoColumn("应收", "￥20.00"),
-    ///     .cut
-    /// ).print(to: bluetoothTransport)
     /// 便捷构建小票对象（纯变长参数 DSL，支持链式 .print(to:)）
     ///
     /// ```swift
@@ -86,6 +59,20 @@ public enum LinePrinter {
         _ chunks: Chunk...
     ) -> Ticket {
         Ticket(chunks: chunks, autoInitialize: autoInitialize, autoCut: autoCut)
+    }
+    
+    /// 解析服务端下发的 JSON 字符串构建小票对象
+    /// - Parameter jsonString: JSON 描述字符串
+    /// - Returns: 构建完成的 `Ticket` 对象
+    public static func ticket(jsonString: String) throws -> Ticket {
+        try Ticket(jsonString: jsonString)
+    }
+    
+    /// 解析服务端下发的 JSON 二进制 Data 构建小票对象
+    /// - Parameter jsonData: JSON 二进制数据
+    /// - Returns: 构建完成的 `Ticket` 对象
+    public static func ticket(jsonData: Data) throws -> Ticket {
+        try Ticket(jsonData: jsonData)
     }
     
     /// 便捷构建小票对象（数组参数）
