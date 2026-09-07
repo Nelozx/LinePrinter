@@ -9,34 +9,6 @@
 import UIKit
 import CoreImage
 
-/// 小票纸张规格尺寸定义
-public enum ReceiptPaperWidth: Equatable {
-    /// 58mm 规格（标准点阵约 384 点，UI 预览基准宽度约 300pt）
-    case mm58
-    /// 80mm 规格（标准点阵约 576 点，UI 预览基准宽度约 380pt）
-    case mm80
-    /// 自定义点阵/点数宽度
-    case custom(CGFloat)
-    
-    /// 预览视图对应的点数宽度
-    public var points: CGFloat {
-        switch self {
-        case .mm58: return 300
-        case .mm80: return 380
-        case .custom(let w): return w
-        }
-    }
-    
-    /// 纸张规格标题
-    public var title: String {
-        switch self {
-        case .mm58: return "58mm 纸宽"
-        case .mm80: return "80mm 纸宽"
-        case .custom(let w): return "自定义 (\(Int(w))pt)"
-        }
-    }
-}
-
 // MARK: - 小票预览视图 (ReceiptPreviewView)
 
 /// 商业级热敏小票真实外观模拟渲染视图
