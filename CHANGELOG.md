@@ -4,6 +4,18 @@
 
 ---
 
+## [0.5.0] - 2026-09-08
+
+### 重构与优化 (Refactor & Architecture)
+- **纯粹现代 API，彻底移除所有历史兼容垫片与废弃别名**：
+  - 彻底剔除 `Line` 别名，排版列单元统一为 `Col`（`Column`）。
+  - 彻底剔除 `twoColumn` / `threeColumn`，统一为重载的 `.row(...)`。
+  - 清理旧指令别名，统一为 `.drawer`、`.beep`、`.spacing`、`.defaultSpacing`、`.blackMark`。
+- **职责清晰分层与最大化代码复用**：
+  - 抽象统一单色点阵模型 `MonochromeBitmap`，消除二值化抖动在光栅数据与 UI 预览间的双重计算，性能显著提升。
+  - 服务端 JSON 解析解码全面复用 DSL 静态工厂方法，确保双端行为 100% 同步。
+  - 统筹对齐方式 `Commands.Alignment` 与 UIKit `NSTextAlignment` 的属性映射。
+
 ## [0.3.0] - 2026-09-07
 
 ### 新增功能 (Added)

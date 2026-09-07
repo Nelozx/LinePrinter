@@ -7,7 +7,7 @@
 [![Swift 5.0+](https://img.shields.io/badge/Swift-5.0+-orange.svg?style=flat)](https://swift.org)
 [![Platform iOS](https://img.shields.io/badge/Platform-iOS%2012.0+-lightgrey.svg?style=flat)](https://developer.apple.com/ios/)
 [![SPM Compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg?style=flat)](https://swift.org/package-manager/)
-[![CocoaPods](https://img.shields.io/badge/CocoaPods-v0.3.0-blue.svg?style=flat)](https://cocoapods.org)
+[![CocoaPods](https://img.shields.io/badge/CocoaPods-v0.5.0-blue.svg?style=flat)](https://cocoapods.org)
 [![License MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat)](https://github.com/Nelozx/LinePrinter/blob/main/LICENSE)
 
 `LinePrinter` 是一个专为 iOS 设计的 **纯原生、零依赖、无侵入的 ESC/POS 热敏小票声明式排版与高保真预览引擎**。适用于餐饮结账、外卖出单、零售收银、商超购物单与仓储标签等全行业业务场景。
@@ -63,7 +63,7 @@ https://github.com/Nelozx/LinePrinter.git
 
 ```ruby
 # 方式 A：指定发布的稳定 Tag 版本 (推荐)
-pod 'LinePrinter', :git => 'https://github.com/Nelozx/LinePrinter.git', :tag => '0.3.0'
+pod 'LinePrinter', :git => 'https://github.com/Nelozx/LinePrinter.git', :tag => '0.5.0'
 
 # 方式 B：直接追踪主分支最新代码
 pod 'LinePrinter', :git => 'https://github.com/Nelozx/LinePrinter.git'

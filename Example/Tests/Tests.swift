@@ -265,7 +265,7 @@ class Tests: XCTestCase {
         XCTAssertTrue(status.contains(.paperEmpty))
         
         // 4. LinePrinter 统一门面与命名空间验证
-        XCTAssertEqual(LinePrinter.version, "0.3.0")
+        XCTAssertEqual(LinePrinter.version, "0.5.0")
         let facadeTicket = LinePrinter.ticket(
             .text("门面小票标题", bold: true, alignment: .center),
             .qrcode("https://lineprinter.dev")

@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'LinePrinter'
-  s.version          = '0.3.0'
+  s.version          = '0.5.0'
   s.summary          = 'A declarative ESC/POS thermal printer layout engine and visual previewer for iOS.'
   s.description      = <<-DESC
 LinePrinter is a declarative ESC/POS thermal receipt layout engine and visual previewer for iOS.

@@ -7,7 +7,7 @@
 [![Swift 5.0+](https://img.shields.io/badge/Swift-5.0+-orange.svg?style=flat)](https://swift.org)
 [![Platform iOS](https://img.shields.io/badge/Platform-iOS%2012.0+-lightgrey.svg?style=flat)](https://developer.apple.com/ios/)
 [![SPM Compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg?style=flat)](https://swift.org/package-manager/)
-[![CocoaPods](https://img.shields.io/badge/CocoaPods-v0.3.0-blue.svg?style=flat)](https://cocoapods.org)
+[![CocoaPods](https://img.shields.io/badge/CocoaPods-v0.5.0-blue.svg?style=flat)](https://cocoapods.org)
 [![License MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat)](https://github.com/Nelozx/LinePrinter/blob/main/LICENSE)
 
 `LinePrinter` is a pure native, zero-dependency, and non-intrusive **declarative ESC/POS thermal receipt layout engine and visual previewer** designed for iOS. Tailored for restaurant dining, takeout tickets, retail checkout, supermarkets, and warehouse logistics.
@@ -63,7 +63,7 @@ Add the following to your `Podfile`:
 
 ```ruby
 # Option A: Specify the tagged release version (Recommended)
-pod 'LinePrinter', :git => 'https://github.com/Nelozx/LinePrinter.git', :tag => '0.3.0'
+pod 'LinePrinter', :git => 'https://github.com/Nelozx/LinePrinter.git', :tag => '0.5.0'
 
 # Option B: Track the latest main branch
 pod 'LinePrinter', :git => 'https://github.com/Nelozx/LinePrinter.git'
