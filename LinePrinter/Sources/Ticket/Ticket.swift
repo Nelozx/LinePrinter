@@ -41,54 +41,51 @@ public struct Ticket {
     public private(set) var chunks: [Chunk] = []
     
     /// 使用变长参数初始化小票
-    /// - Parameter chunks: 变长排版块
     public init(_ chunks: Chunk...) {
         self.chunks = chunks
     }
     
     /// 初始化小票
-    /// - Parameters:
-    ///   - chunks: 排版块数组
-    ///   - autoInitialize: 是否在头部自动初始化，默认 `true`
-    ///   - autoCut: 是否在末尾自动走纸切纸，默认 `false`
-    public init(chunks: [Chunk], autoInitialize: Bool = true, autoCut: Bool = false) {
+    public init(chunks: [Chunk] = [], autoInitialize: Bool = true, autoCut: Bool = false) {
         self.chunks = chunks
         self.autoInitialize = autoInitialize
         self.autoCut = autoCut
     }
-    
-    /// 向小票末尾追加单个排版块
-    /// - Parameter chunk: 要追加的排版块
-    public mutating func append(_ chunk: Chunk) {
-        chunks.append(chunk)
+
+    /// 链式配置：是否在末尾自动切纸
+    public func autoCut(_ enabled: Bool = true) -> Ticket {
+        var copy = self
+        copy.autoCut = enabled
+        return copy
+    }
+
+    /// 链式配置：是否在头部自动重置初始化
+    public func autoInitialize(_ enabled: Bool = true) -> Ticket {
+        var copy = self
+        copy.autoInitialize = enabled
+        return copy
     }
     
-    /// 向小票末尾批量追加排版块
-    /// - Parameter newChunks: 排版块数组
-    public mutating func append(_ newChunks: [Chunk]) {
-        chunks.append(contentsOf: newChunks)
+    /// 向小票末尾追加排版块（变长参数）
+    public mutating func append(_ chunks: Chunk...) {
+        self.chunks.append(contentsOf: chunks)
     }
     
-    /// 生成小票各个块的分包二进制数据数组
-    /// - Parameter encoding: 字符编码（中文通常为 `.gbk` 或 `.utf8`）
-    /// - Returns: 二进制数据分包数组
-    public func data(using encoding: String.Encoding) -> [Data] {
+    /// 向小票末尾批量追加排版块（数组）
+    public mutating func append(_ chunks: [Chunk]) {
+        self.chunks.append(contentsOf: chunks)
+    }
+    
+    /// 生成小票分包二进制数据数组
+    public func data(using encoding: String.Encoding = .gbk) -> [Data] {
         var payload = [Data]()
-        
-        // 头部初始化
         if autoInitialize {
             payload.append(Data(escpos: .initialize, .printAndFeed(lines: 0)))
         }
-        
-        for chunk in chunks {
-            payload.append(chunk.data(using: encoding))
-        }
-        
-        // 尾部切纸
+        payload.append(contentsOf: chunks.map { $0.data(using: encoding) })
         if autoCut {
             payload.append(Data.feedAndCut)
         }
-        
         return payload
     }
     

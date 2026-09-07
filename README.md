@@ -132,7 +132,7 @@ let jsonString = """
 }
 """
 
-let ticket = try Ticket(jsonString: jsonString)
+let ticket = try Ticket(json: jsonString)
 
 // 2. Dispatch with one line
 ticket.print(to: bluetoothTransport)

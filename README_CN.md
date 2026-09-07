@@ -132,7 +132,7 @@ let jsonString = """
 }
 """
 
-let ticket = try Ticket(jsonString: jsonString)
+let ticket = try Ticket(json: jsonString)
 
 // 2. 一行代码直接发送打印
 ticket.print(to: bluetoothTransport)

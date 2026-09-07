@@ -81,22 +81,18 @@ public struct Row: Printable {
     
     public func data(using encoding: String.Encoding) -> Data {
         guard !columns.isEmpty else { return Data() }
-        
-        let calculatedWidths = computeColumnWidths()
-        
-        // 判断是否需要开启多行折行排版
-        let needsWrap = columns.contains(where: { $0.isWrapEnabled && $0.text.printDisplayWidth > (calculatedWidths[columns.firstIndex(where: { $0.text == $0.text }) ?? 0]) })
+        let widths = computeColumnWidths()
+        let needsWrap = zip(columns, widths).contains { col, width in
+            col.isWrapEnabled && col.text.printDisplayWidth > width
+        }
         
         if needsWrap {
-            return formatWrappedLines(calculatedWidths: calculatedWidths, encoding: encoding)
+            return formatWrappedLines(calculatedWidths: widths, encoding: encoding)
         } else {
-            var lineString = ""
-            for (index, col) in columns.enumerated() {
-                let width = calculatedWidths[index]
-                let colString = formatColumn(text: col.text, targetWidth: width, alignment: col.alignment)
-                lineString += colString
-            }
-            return lineString.data(using: encoding) ?? Data()
+            let line = zip(columns, widths).map { col, width in
+                formatColumn(text: col.text, targetWidth: width, alignment: col.alignment)
+            }.joined()
+            return line.data(using: encoding) ?? Data()
         }
     }
     
@@ -105,38 +101,24 @@ public struct Row: Printable {
         var columnLines = [[String]]()
         var maxLines = 1
         
-        for (index, col) in columns.enumerated() {
-            let width = calculatedWidths[index]
+        for (col, width) in zip(columns, calculatedWidths) {
             if col.isWrapEnabled {
                 let segments = splitTextToLines(col.text, maxWidth: width)
-                let paddedSegments = segments.map { formatColumn(text: $0, targetWidth: width, alignment: col.alignment) }
-                columnLines.append(paddedSegments)
-                maxLines = max(maxLines, paddedSegments.count)
+                let padded = segments.map { formatColumn(text: $0, targetWidth: width, alignment: col.alignment) }
+                columnLines.append(padded)
+                maxLines = max(maxLines, padded.count)
             } else {
-                let formatted = formatColumn(text: col.text, targetWidth: width, alignment: col.alignment)
-                columnLines.append([formatted])
+                columnLines.append([formatColumn(text: col.text, targetWidth: width, alignment: col.alignment)])
             }
         }
         
-        var fullOutput = ""
-        for lineIndex in 0..<maxLines {
-            var singleLine = ""
-            for (colIndex, lines) in columnLines.enumerated() {
-                let width = calculatedWidths[colIndex]
-                if lineIndex < lines.count {
-                    singleLine += lines[lineIndex]
-                } else {
-                    // 补齐空格保持对齐
-                    singleLine += String(repeating: " ", count: width)
-                }
-            }
-            fullOutput += singleLine
-            if lineIndex < maxLines - 1 {
-                fullOutput += "\n"
-            }
+        let formattedLines = (0..<maxLines).map { lineIndex in
+            zip(columnLines, calculatedWidths).map { lines, width in
+                lineIndex < lines.count ? lines[lineIndex] : String(repeating: " ", count: width)
+            }.joined()
         }
         
-        return fullOutput.data(using: encoding) ?? Data()
+        return formattedLines.joined(separator: "\n").data(using: encoding) ?? Data()
     }
     
     /// 将文本拆分为多行

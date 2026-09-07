@@ -62,8 +62,6 @@ class ViewController: UIViewController {
         let printDensity = totalWidth == 32 ? 384 : 576
         
         return LinePrinter.ticket(
-            autoInitialize: true,
-            autoCut: true,
             // 1. 顶部行间距与蜂鸣器设置
             .lineSpacing(22),
             // 2. 顶部 Logo 图案 (单色位图抖动打印)
@@ -105,7 +103,7 @@ class ViewController: UIViewController {
             .defaultLineSpacing,
             .buzzer(times: 2),
             .feed(lines: 2)
-        )
+        ).autoCut()
     }
 
     // MARK: - 刷新小票模型与原生预览模式视图
@@ -180,7 +178,7 @@ class ViewController: UIViewController {
         """
         
         do {
-            let ticket = try Ticket(jsonString: jsonString)
+            let ticket = try Ticket(json: jsonString)
             currentPaperWidth = 32
             currentTicket = ticket
             currentPrintData = ticket.bytes(using: .gbk)

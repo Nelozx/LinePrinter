@@ -399,7 +399,7 @@ class Tests: XCTestCase {
         """
         
         do {
-            let ticket = try Ticket(jsonString: jsonString)
+            let ticket = try Ticket(json: jsonString)
             XCTAssertTrue(ticket.autoCut)
             XCTAssertTrue(ticket.autoInitialize)
             XCTAssertEqual(ticket.chunks.count, 4)
@@ -424,7 +424,6 @@ class Tests: XCTestCase {
     // MARK: - 预览与图片长图渲染测试
     func testTicketPreviewImageGeneration() {
         let ticket58 = LinePrinter.ticket(
-            autoCut: true,
             .text("味美餐饮旗舰店", bold: true, alignment: .center),
             .text("-- 欢迎光临 --", attributes: [TextAttribute.alignment(.center)]),
             .splitter,
@@ -448,7 +447,7 @@ class Tests: XCTestCase {
             .text("扫码开具增值税电子发票", alignment: .center),
             .qrcode("https://weixin.qq.com/r/example_invoice"),
             .blank
-        )
+        ).autoCut()
         
         let img58 = ticket58.previewImage(paperWidth: .mm58)
         XCTAssertNotNil(img58, "58mm 小票长图渲染失败")
@@ -456,7 +455,6 @@ class Tests: XCTestCase {
         XCTAssertGreaterThan(img58?.size.height ?? 0, 0)
         
         let ticket80 = LinePrinter.ticket(
-            autoCut: true,
             .text("精品生活大型商超购物小票", bold: true, alignment: .center),
             .text("门店: 科技园旗舰总店", alignment: .center),
             .splitter,
@@ -472,7 +470,7 @@ class Tests: XCTestCase {
             .splitter,
             .barcode("6901234567890"),
             .blank
-        )
+        ).autoCut()
         
         let img80 = ticket80.previewImage(paperWidth: .mm80)
         XCTAssertNotNil(img80, "80mm 小票长图渲染失败")

@@ -39,98 +39,23 @@ public enum LinePrinter {
     /// 框架版本号
     public static let version = "0.3.0"
     
-    /// 便捷构建小票对象（纯变长参数 DSL，支持链式 .print(to:)）
-    ///
-    /// ```swift
-    /// LinePrinter.ticket(
-    ///     .text("快速结账单", bold: true, alignment: .center),
-    ///     .twoColumn("应收", "￥20.00"),
-    ///     .cut
-    /// ).print(to: bluetoothTransport)
-    /// ```
+    /// 构建小票对象（变长参数 DSL，支持链式 .print(to:)）
     public static func ticket(_ chunks: Chunk...) -> Ticket {
         Ticket(chunks: chunks, autoInitialize: true, autoCut: false)
     }
 
-    /// 便捷构建小票对象（带初始化/切纸控制的变长参数 DSL）
-    public static func ticket(
-        autoInitialize: Bool = true,
-        autoCut: Bool = false,
-        _ chunks: Chunk...
-    ) -> Ticket {
-        Ticket(chunks: chunks, autoInitialize: autoInitialize, autoCut: autoCut)
-    }
+    /// 解析服务端下发的 JSON 构建小票对象
+    public static func ticket(json: String) throws -> Ticket { try Ticket(json: json) }
+    public static func ticket(json: Data) throws -> Ticket { try Ticket(json: json) }
     
-    /// 解析服务端下发的 JSON 字符串构建小票对象
-    /// - Parameter jsonString: JSON 描述字符串
-    /// - Returns: 构建完成的 `Ticket` 对象
-    public static func ticket(jsonString: String) throws -> Ticket {
-        try Ticket(jsonString: jsonString)
+    /// 由排版块直接生成连续的 ESC/POS 二进制字节流（变长参数直出）
+    public static func bytes(_ chunks: Chunk...) -> Data {
+        Ticket(chunks: chunks).bytes()
     }
-    
-    /// 解析服务端下发的 JSON 二进制 Data 构建小票对象
-    /// - Parameter jsonData: JSON 二进制数据
-    /// - Returns: 构建完成的 `Ticket` 对象
-    public static func ticket(jsonData: Data) throws -> Ticket {
-        try Ticket(jsonData: jsonData)
-    }
-    
-    /// 便捷构建小票对象（数组参数）
-    ///
-    /// - Parameters:
-    ///   - chunks: 排版块数组
-    ///   - autoInitialize: 是否在头部自动初始化（`ESC @`），默认为 `true`
-    ///   - autoCut: 是否在末尾自动切纸，默认为 `false`
-    /// - Returns: 构建完成的 `Ticket` 小票对象
-    public static func ticket(
-        chunks: [Chunk],
-        autoInitialize: Bool = true,
-        autoCut: Bool = false
-    ) -> Ticket {
-        Ticket(chunks: chunks, autoInitialize: autoInitialize, autoCut: autoCut)
-    }
-    
-    /// 直接由排版块生成标准 ESC/POS 连续二进制字节流（数组块直出）
-    ///
-    /// 无需手动管理 `Ticket` 变量，直接传入排版块即可获得连续的 `Data`。
-    /// - Parameters:
-    ///   - chunks: 排版块数组
-    ///   - encoding: 中文编码，默认 `.gbk`（GB18030 / GBK）
-    ///   - autoInitialize: 是否自动在头部插入 `ESC @` 初始化指令，默认 `true`
-    ///   - autoCut: 是否在末尾自动切纸，默认 `false`
-    /// - Returns: 标准连续的 ESC/POS 二进制字节流 `Data`
-    ///
-    /// ```swift
-    /// let data = LinePrinter.bytes(chunks: [.text("外卖结算单"), .cut])
-    /// ```
-    public static func bytes(
-        chunks: [Chunk],
-        encoding: String.Encoding = .gbk,
-        autoInitialize: Bool = true,
-        autoCut: Bool = false
-    ) -> Data {
-        Ticket(chunks: chunks, autoInitialize: autoInitialize, autoCut: autoCut).bytes(using: encoding)
-    }
-    
-    /// 直接由排版块生成标准 ESC/POS 连续二进制字节流（变长参数直出）
-    ///
-    /// - Parameters:
-    ///   - encoding: 字符编码，默认 `.gbk`
-    ///   - autoInitialize: 是否自动在头部初始化，默认 `true`
-    ///   - autoCut: 是否在末尾自动切纸，默认 `false`
-    ///   - chunks: 变长排版块列表
-    /// - Returns: 标准连续的 ESC/POS 二进制指令字节流 `Data`
-    ///
-    /// ```swift
-    /// let data = LinePrinter.bytes(.text("桌号: A08"), .feedAndCut)
-    /// ```
-    public static func bytes(
-        encoding: String.Encoding = .gbk,
-        autoInitialize: Bool = true,
-        autoCut: Bool = false,
-        _ chunks: Chunk...
-    ) -> Data {
-        bytes(chunks: chunks, encoding: encoding, autoInitialize: autoInitialize, autoCut: autoCut)
+
+    /// 由排版块直接生成连续的 ESC/POS 二进制字节流（数组直出）
+    public static func bytes(chunks: [Chunk], encoding: String.Encoding = .gbk) -> Data {
+        Ticket(chunks: chunks).bytes(using: encoding)
     }
     
     /// 解析打印机回传的标准 ESC/POS 实时硬件状态字节（实时查询或 DLE EOT 回执）

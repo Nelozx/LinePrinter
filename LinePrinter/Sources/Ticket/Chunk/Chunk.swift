@@ -265,75 +265,35 @@ public extension Chunk {
     }
     
     /// 全切纸指令块
-    ///
-    /// 向打印机发送全切纸命令（GS V 48）。
-    static var cut: Self {
-        Chunk(Data.cut, feedPoints: 0)
-    }
+    static var cut: Self { Chunk(Data.cut, feedPoints: 0) }
     
     /// 半切纸指令块
-    ///
-    /// 向打印机发送半切纸命令（GS V 49），保留一小段连接点便于人工取票。
-    static var partialCut: Self {
-        Chunk(Data.partialCut, feedPoints: 0)
-    }
+    static var partialCut: Self { Chunk(Data.partialCut, feedPoints: 0) }
     
     /// 自动进纸并全切纸
-    ///
-    /// 先走纸数行（预留切刀与打印头安全距离），随后执行切纸。
-    static var feedAndCut: Self {
-        Chunk(Data.feedAndCut, feedPoints: 0)
-    }
+    static var feedAndCut: Self { Chunk(Data.feedAndCut, feedPoints: 0) }
     
     /// 弹出收银钱箱
-    ///
-    /// 向打印机输出钱箱引脚脉冲信号（ESC p 0 60 255）。
-    static var openDrawer: Self {
-        Chunk(Data.openDrawer, feedPoints: 0)
-    }
+    static var openDrawer: Self { Chunk(Data.openDrawer, feedPoints: 0) }
     
     /// 走纸指定行数
-    ///
-    /// - Parameter lines: 需空白走纸的行数，默认为 1 行
-    /// - Returns: 走纸排版块
-    ///
-    /// ```swift
-    /// .feed(lines: 3)
-    /// ```
     static func feed(lines: UInt8 = 1) -> Self {
         Chunk(Data(escpos: .printAndFeed(lines: lines)), feedPoints: 0)
     }
     
     /// 蜂鸣器发声提示块（后厨出单提醒、外卖催单）
-    /// - Parameters:
-    ///   - times: 蜂鸣次数（1~9 次，默认为 1 次）
-    ///   - duration: 每次蜂鸣时长（duration × 50ms，默认 2 即 100ms）
-    /// - Returns: 蜂鸣排版块
-    ///
-    /// ```swift
-    /// .buzzer(times: 3)
-    /// ```
     static func buzzer(times: UInt8 = 1, duration: UInt8 = 2) -> Self {
         Chunk(Data.buzzer(times: times, duration: duration), feedPoints: 0)
     }
     
     /// 设置自定义行间距（紧凑排版/节省纸张）
-    /// - Parameter points: 垂直点阵数（0~255）
-    ///
-    /// ```swift
-    /// .lineSpacing(20) // 设置紧凑行距
-    /// ```
     static func lineSpacing(_ points: UInt8) -> Self {
         Chunk(Data.lineSpacing(points), feedPoints: 0)
     }
     
     /// 恢复出厂默认行间距（约 30 点阵）
-    static var defaultLineSpacing: Self {
-        Chunk(Data.defaultLineSpacing, feedPoints: 0)
-    }
+    static var defaultLineSpacing: Self { Chunk(Data.defaultLineSpacing, feedPoints: 0) }
     
     /// 进纸定位至黑标/标签缝隙（标签小票机专用）
-    static var feedToBlackMark: Self {
-        Chunk(Data.feedToBlackMark, feedPoints: 0)
-    }
+    static var feedToBlackMark: Self { Chunk(Data.feedToBlackMark, feedPoints: 0) }
 }
