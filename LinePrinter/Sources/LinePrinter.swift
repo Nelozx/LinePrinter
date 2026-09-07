@@ -146,6 +146,69 @@ public enum LinePrinter {
         bytes(chunks: chunks, encoding: encoding, autoInitialize: autoInitialize, autoCut: autoCut)
     }
     
+    /// 直接构建并发送小票到指定通道（变长参数构建即发送）
+    ///
+    /// - Parameters:
+    ///   - transport: 遵循 `PrinterTransport` 的通信对象（蓝牙/Socket等）
+    ///   - encoding: 字符编码，默认 `.gbk`
+    ///   - autoInitialize: 是否在头部自动初始化，默认 `true`
+    ///   - autoCut: 是否在末尾自动切纸，默认 `false`
+    ///   - chunks: 变长排版块列表
+    /// - Returns: 构建的小票对象 `Ticket`（可继续链式调用 previewView 等）
+    ///
+    /// ```swift
+    /// LinePrinter.print(to: myTransport, autoCut: true,
+    ///     .text("味美餐饮店", bold: true, alignment: .center),
+    ///     .splitter,
+    ///     .twoColumn("实付金额", "￥30.00"),
+    ///     .qrcode("https://...")
+    /// )
+    /// ```
+    @discardableResult
+    public static func print(
+        to transport: PrinterTransport,
+        encoding: String.Encoding = .gbk,
+        autoInitialize: Bool = true,
+        autoCut: Bool = false,
+        _ chunks: Chunk...
+    ) -> Ticket {
+        let ticket = Ticket(chunks: chunks, autoInitialize: autoInitialize, autoCut: autoCut)
+        ticket.print(to: transport, encoding: encoding)
+        return ticket
+    }
+    
+    /// 直接构建并发送小票到指定通道（ResultBuilder 闭包构建即发送）
+    ///
+    /// - Parameters:
+    ///   - transport: 遵循 `PrinterTransport` 的通信对象（蓝牙/Socket等）
+    ///   - encoding: 字符编码，默认 `.gbk`
+    ///   - autoInitialize: 是否在头部自动初始化，默认 `true`
+    ///   - autoCut: 是否在末尾自动切纸，默认 `false`
+    ///   - builder: 声明式排版块闭包
+    /// - Returns: 构建的小票对象 `Ticket`
+    ///
+    /// ```swift
+    /// LinePrinter.print(to: myTransport, autoCut: true) {
+    ///     Chunk.text("欢迎光临", bold: true, alignment: .center)
+    ///     for item in items {
+    ///         Chunk.threeColumn(item.name, item.qty, item.price)
+    ///     }
+    ///     Chunk.qrcode("https://...")
+    /// }
+    /// ```
+    @discardableResult
+    public static func print(
+        to transport: PrinterTransport,
+        encoding: String.Encoding = .gbk,
+        autoInitialize: Bool = true,
+        autoCut: Bool = false,
+        @TicketBuilder _ builder: () -> [Chunk]
+    ) -> Ticket {
+        let ticket = Ticket(autoInitialize: autoInitialize, autoCut: autoCut, builder: builder)
+        ticket.print(to: transport, encoding: encoding)
+        return ticket
+    }
+    
     /// 解析打印机回传的标准 ESC/POS 实时硬件状态字节（实时查询或 DLE EOT 回执）
     ///
     /// - Parameter byte: 打印机返回的原始字节（如通过蓝牙特征值通知或 Socket 读取到的单字节）

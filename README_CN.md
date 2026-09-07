@@ -151,9 +151,9 @@ myTcpSocket.write(data)
 SunmiPrinterService.shared.sendRAWData(data)
 ```
 
-#### 方式 B：通过极简输出协议 `PrinterTransport`
+#### 方式 B：通过通道协议 `PrinterTransport`（链式直出 / 构建即发送）
 
-让你的通信管理类遵循 `PrinterTransport` 协议即可：
+让你的通信管理类遵循 `PrinterTransport` 协议：
 
 ```swift
 class MyBluetoothManager: PrinterTransport {
@@ -163,9 +163,28 @@ class MyBluetoothManager: PrinterTransport {
     }
 }
 
-let transport = MyBluetoothManager()
-// 直接将小票输出到通道
-ticket.print(to: transport, encoding: .gbk)
+let bluetooth = MyBluetoothManager()
+
+// 语法 1：变长参数构建即发送（一行直出，无需临时变量）
+LinePrinter.print(to: bluetooth, autoCut: true,
+    .text("快速收银小票", bold: true, alignment: .center),
+    .splitter,
+    .twoColumn("实付金额", "￥30.00"),
+    .qrcode("https://...")
+)
+
+// 语法 2：ResultBuilder 闭包构建即发送（支持 if/for，手感如 SwiftUI）
+LinePrinter.print(to: bluetooth, autoCut: true) {
+    Chunk.text("味美餐饮店", bold: true, alignment: .center)
+    for item in orderItems {
+        Chunk.threeColumn(item.name, "x\(item.quantity)", item.price)
+    }
+    Chunk.twoColumn("实付金额", "￥50.00")
+    Chunk.qrcode("https://...")
+}
+
+// 语法 3：现有 Ticket 对象链式发送
+ticket.print(to: bluetooth)
 ```
 
 ---

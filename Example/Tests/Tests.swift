@@ -213,7 +213,7 @@ class Tests: XCTestCase {
         XCTAssertEqual(fullBytes[1], 64)
     }
     
-    // MARK: - 极简解耦测试: 自定义外部输出通道 (完全无需内置 Driver)
+    // MARK: - 极简解耦测试: 链式通道直出（构建即发送）
     func testCustomTransportDecoupling() {
         class MockCustomTransport: PrinterTransport {
             var receivedData = Data()
@@ -223,10 +223,26 @@ class Tests: XCTestCase {
         }
         
         let mock = MockCustomTransport()
-        let ticket = Ticket(chunks: [.text("自定义通道测试")])
         
-        // 验证直接通过协议输出
-        ticket.print(to: mock, encoding: .gbk)
+        // 1. 链式调用返回自身
+        let ticket = Ticket(chunks: [.text("自定义通道测试")]).print(to: mock, encoding: .gbk)
+        XCTAssertFalse(mock.receivedData.isEmpty)
+        XCTAssertEqual(ticket.chunks.count, 1)
+        
+        // 2. 门面变长参数直出 (构建即发送)
+        mock.receivedData = Data()
+        LinePrinter.print(to: mock, autoCut: true,
+            .text("快速收银"),
+            .twoColumn("实付", "￥20.00")
+        )
+        XCTAssertFalse(mock.receivedData.isEmpty)
+        
+        // 3. 门面 ResultBuilder 闭包直出 (构建即发送)
+        mock.receivedData = Data()
+        LinePrinter.print(to: mock, autoCut: true) {
+            Chunk.text("美味餐厅")
+            Chunk.twoColumn("合计", "￥50.00")
+        }
         XCTAssertFalse(mock.receivedData.isEmpty)
     }
     

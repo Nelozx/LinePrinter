@@ -151,7 +151,7 @@ myTcpSocket.write(data)
 SunmiPrinterService.shared.sendRAWData(data)
 ```
 
-#### Approach B: Via `PrinterTransport` Protocol
+#### Approach B: Via `PrinterTransport` (Chain-and-Send / Build-and-Print)
 
 Conform your communication manager to `PrinterTransport`:
 
@@ -162,9 +162,28 @@ class MyBluetoothManager: PrinterTransport {
     }
 }
 
-let transport = MyBluetoothManager()
-// Print directly through transport
-ticket.print(to: transport, encoding: .gbk)
+let bluetooth = MyBluetoothManager()
+
+// Syntax 1: Variadic parameters (Build & dispatch in 1 line without temporary variables)
+LinePrinter.print(to: bluetooth, autoCut: true,
+    .text("Quick Checkout", bold: true, alignment: .center),
+    .splitter,
+    .twoColumn("Total Paid", "$30.00"),
+    .qrcode("https://...")
+)
+
+// Syntax 2: ResultBuilder closure (SwiftUI-like declarative syntax with native loops)
+LinePrinter.print(to: bluetooth, autoCut: true) {
+    Chunk.text("Gourmet Restaurant", bold: true, alignment: .center)
+    for item in orderItems {
+        Chunk.threeColumn(item.name, "x\(item.qty)", item.price)
+    }
+    Chunk.twoColumn("Total Paid", "$50.00")
+    Chunk.qrcode("https://...")
+}
+
+// Syntax 3: Fluent chaining on existing Ticket
+ticket.print(to: bluetooth)
 ```
 
 ---

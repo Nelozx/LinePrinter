@@ -132,12 +132,15 @@ public struct Ticket {
     /// - Parameters:
     ///   - transport: 遵循 `PrinterTransport` 的输出目标对象
     ///   - encoding: 字符编码，默认 `.gbk`
+    /// - Returns: 当前小票对象（支持流式链式调用）
     ///
     /// ```swift
     /// ticket.print(to: myTransport, encoding: .gbk)
     /// ```
-    public func print(to transport: PrinterTransport, encoding: String.Encoding = .gbk) {
+    @discardableResult
+    public func print(to transport: PrinterTransport, encoding: String.Encoding = .gbk) -> Ticket {
         transport.write(bytes(using: encoding))
+        return self
     }
     
     /// 获取当前小票编译出的十六进制指令字符串（便于调试与协议比对）
