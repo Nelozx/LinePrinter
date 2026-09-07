@@ -37,7 +37,7 @@ import AppKit
 public enum LinePrinter {
     
     /// 框架版本号
-    public static let version = "0.5.0"
+    public static let version = "0.6.0"
     
     /// 构建小票对象（变长参数 DSL，支持链式 .print(to:)）
     public static func ticket(_ chunks: Chunk...) -> Ticket {

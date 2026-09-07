@@ -4,6 +4,23 @@
 
 ---
 
+## [0.6.0] - 2026-09-08
+
+### 新增与增强 (Added & Enhanced)
+- **纯内存 Base64 与二进制 Data 位图无缝支持**：
+  - 支持服务端动态下发 Base64 编码图案（自动清洗 `data:image/...;base64,` 前缀），纯内存二值化，零网络请求、零主线程卡顿隐患。
+  - 纯 Data 基于跨平台 `ImageIO` 硬件解码，彻底消除 UIKit / AppKit 平台宏耦合。
+- **双列智能自适应排版（彻底解决长单号截断问题）**：
+  - 优化 `Row` 热敏排版算法：双列等权重下，右列紧凑占用自身所需宽度，剩余全部空间自动分配给左侧长文本，杜绝长单号被死板 50% 机械截断。
+  - 优化 `TicketPreview` 渲染引擎：动态配置 Content Hugging 与 Compression 阻抗，UI 预览与高清长图导出绝无省略号截断。
+
+### 重构与精简 (Refactor & Cleanup)
+- **JSON 解析器全面精简（`TicketJSONDecoder`）**：
+  - 消除多余平台依赖与重复分支，动作控制指令统一收敛归拢，修复原代码提前 `return` 导致的 `feedPoints` 偶发不生效问题。
+  - 保持底层核心金标准协议纯粹，配合 `TicketConvertible` 和 `Ticket(json:mapper:)` 闭包适配器，任意第三方/私有非标 JSON 零门槛无侵入对接。
+- **Demo App 升级**：
+  - 界面与 JSON 模板全面接入 Base64 品牌 Logo 实装演示与 Floyd-Steinberg 误差扩散抖动出纸动效。
+
 ## [0.5.0] - 2026-09-08
 
 ### 重构与优化 (Refactor & Architecture)
