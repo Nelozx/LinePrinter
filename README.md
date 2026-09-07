@@ -52,10 +52,14 @@ https://github.com/Nelozx/LinePrinter.git
 
 ### CocoaPods
 
-在 Podfile 中添加：
+在 `Podfile` 中直接通过 GitHub 仓库引入：
 
 ```ruby
-pod 'LinePrinter'
+# 方式 A：指定发布的稳定 Tag 版本 (推荐)
+pod 'LinePrinter', :git => 'https://github.com/Nelozx/LinePrinter.git', :tag => '0.3.0'
+
+# 方式 B：直接追踪主分支最新代码
+pod 'LinePrinter', :git => 'https://github.com/Nelozx/LinePrinter.git'
 ```
 
 ---
