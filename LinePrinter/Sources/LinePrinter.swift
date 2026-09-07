@@ -37,7 +37,7 @@ import AppKit
 public enum LinePrinter {
     
     /// 框架版本号
-    public static let version = "0.2.0"
+    public static let version = "0.3.0"
     
     /// 便捷构建小票对象（变长参数 DSL）
     ///

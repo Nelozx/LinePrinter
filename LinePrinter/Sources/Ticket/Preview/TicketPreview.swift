@@ -325,7 +325,6 @@ public class ReceiptPreviewView: UIView {
             
             // 设置权重比例
             if line.columns.count > 1 {
-                let ratio = CGFloat(col.weight)
                 label.tag = col.weight
             }
         }

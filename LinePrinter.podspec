@@ -1,11 +1,11 @@
 Pod::Spec.new do |s|
   s.name             = 'LinePrinter'
-  s.version          = '0.2.0'
-  s.summary          = 'A declarative ESC/POS thermal printer layout engine and driver for iOS.'
+  s.version          = '0.3.0'
+  s.summary          = 'A declarative ESC/POS thermal printer layout engine and visual previewer for iOS.'
   s.description      = <<-DESC
-LinePrinter is a declarative ESC/POS thermal receipt layout engine and driver for iOS.
+LinePrinter is a declarative ESC/POS thermal receipt layout engine and visual previewer for iOS.
 It supports standard text styling, smart multi-column alignment with wrapping, bitmap dithering,
-and zero-dependency network (TCP) and Bluetooth (BLE) printing.
+high-fidelity receipt UI preview, and zero-dependency transport decoupling.
                        DESC
 
   s.homepage         = 'https://github.com/Nelozx/LinePrinter'
@@ -16,5 +16,5 @@ and zero-dependency network (TCP) and Bluetooth (BLE) printing.
 
   s.ios.deployment_target = '12.0'
   s.source_files = 'LinePrinter/Sources/**/*'
-  s.frameworks = 'UIKit'
+  s.frameworks = 'UIKit', 'CoreGraphics', 'CoreImage'
 end

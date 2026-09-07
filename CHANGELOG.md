@@ -4,6 +4,23 @@
 
 ---
 
+## [0.3.0] - 2026-09-07
+
+### 新增功能 (Added)
+- **商业级真实热敏小票视觉预览引擎 (`TicketPreview` / `ReceiptPreviewView`)**：
+  - 逼真纸质质感模拟：包括顶部倒角切口、底部真实物理撕纸微锯齿（Serrated Edge）与阴影渲染。
+  - 原生 CoreImage 条码（Code128）与二维码生成预览。
+  - 支持多列弹性排版与长文本自动换行视觉渲染。
+  - 支持单小票高清晰度（Retina 2x）长图导出（`ticket.previewImage()`）。
+- **仿真出纸物理动画支持**：
+  - 完美复刻打印机出纸口下移送纸与触觉震动反馈。
+  - 优化 GPU 硬件加速合成，避免离屏渲染与布局重算开销。
+
+### 规范调整 (Specification)
+- 更新 `LinePrinter.podspec`：补充 `CoreGraphics`、`CoreImage` 系统 Frameworks 依赖声明。
+- 规范化单元测试用例，移除私有绝对路径依赖。
+
+
 ## [0.2.0] - 2026-09-07
 
 ### 架构与核心升级 (Architecture)
