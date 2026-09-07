@@ -1,0 +1,16 @@
+PODS:
+  - LinePrinter (0.2.0)
+
+DEPENDENCIES:
+  - LinePrinter (from `../`)
+
+EXTERNAL SOURCES:
+  LinePrinter:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  LinePrinter: d731bafb3eaf965af5364947b8c108cbf64d48ae
+
+PODFILE CHECKSUM: 45c6cc3a80a7eac5e92e873fe2064aa2de208576
+
+COCOAPODS: 1.17.0

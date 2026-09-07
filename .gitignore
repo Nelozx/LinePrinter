@@ -35,3 +35,17 @@ Carthage/Build
 # `pod install` in .travis.yml
 #
 # Pods/
+
+# Swift Package Manager
+.build/
+Package.resolved
+.swiftpm/
+
+# CocoaPods
+Pods/
+Example/Pods/
+
+# Executables & Temporary
+main
+Example/LinePrinter/test_animation.swift
+
