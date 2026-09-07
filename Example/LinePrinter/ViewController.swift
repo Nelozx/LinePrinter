@@ -24,7 +24,7 @@ class ViewController: UIViewController {
     // 视图容器
     private let scrollView = UIScrollView()
     private let contentView = UIView()
-    private let segmentWidth = UISegmentedControl(items: ["58mm (硬编码)", "80mm (硬编码)", "JSON 云端排版"])
+    private let segmentWidth = UISegmentedControl(items: ["58mm 极速", "80mm 宽幅", "JSON 排版 (含Base64图案)"])
     
     // 模拟打印机出纸口槽位
     private let printerSlotView = UIView()
@@ -150,12 +150,22 @@ class ViewController: UIViewController {
     }
     
     private func reloadReceiptWithJSON() {
+        // 生成真实有效的 Demo Logo Base64 字符串（体现服务端下发 Base64 动态图案能力）
+        let logoImg = UIImage(named: "good") ?? makeDemoLogoImage()!
+        let base64String = logoImg.pngData()?.base64EncodedString() ?? ""
+        
         let jsonString = """
         {
           "autoCut": true,
           "autoInitialize": true,
           "chunks": [
+            {
+              "type": "image",
+              "base64": "\(base64String)",
+              "dither": "floydSteinberg"
+            },
             { "type": "text", "content": "★ 云端动态结账单 ★", "bold": true, "alignment": "center", "size": "double" },
+            { "type": "text", "content": "[上方 Logo 由云端 Base64 动态下发渲染]", "alignment": "center" },
             { "type": "splitter", "char": "=" },
             { "type": "twoColumn", "left": "单号: NO.20260908001", "right": "收银员: 08" },
             { "type": "splitter", "char": "-" },
@@ -179,6 +189,7 @@ class ViewController: UIViewController {
             },
             { "type": "splitter", "char": "-" },
             { "type": "twoColumn", "left": "实付金额", "right": "￥62.00" },
+            { "type": "splitter", "char": "-" },
             { "type": "text", "content": "扫码下载电子发票", "alignment": "center" },
             { "type": "qrcode", "content": "https://lineprinter.dev" },
             { "type": "barcode", "content": "20260908888", "barcodeType": "code128", "height": 50, "hri": "below" },
