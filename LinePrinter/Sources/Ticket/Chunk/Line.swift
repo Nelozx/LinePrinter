@@ -50,10 +50,6 @@ public struct Line {
     }
 }
 
-/// 单列别名（兼容与直觉语义）
-public typealias LineColumn = Line
-public typealias Column = Line
-
 /// 多列排版行组件
 ///
 /// 精确测算中英文显示宽度，支持自适应权重分配，完美保持小票各列竖向垂直对齐。
@@ -230,5 +226,3 @@ public struct Row: ChunkProvider {
         }
     }
 }
-
-public typealias LineRow = Row

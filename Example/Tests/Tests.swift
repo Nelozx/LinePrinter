@@ -279,10 +279,6 @@ class Tests: XCTestCase {
         // 6. LinePrinter.parseStatus 快捷解析
         let parsed = LinePrinter.parseStatus(byte: 0x60)
         XCTAssertTrue(parsed.contains(.paperEmpty))
-        
-        // 7. Receipt 别名验证
-        let receipt: Receipt = facadeTicket
-        XCTAssertEqual(receipt.chunks.count, 2)
     }
     
     // MARK: - 中文二维码数据长度计算验证

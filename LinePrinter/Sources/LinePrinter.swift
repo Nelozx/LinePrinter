@@ -188,6 +188,3 @@ public enum LinePrinter {
         cgImage.rasterEscPosData(dither: dither)
     }
 }
-
-/// 语义别名：小票收据（等同于 Ticket）
-public typealias Receipt = Ticket
